@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Portal Congreso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    
+    <style>
+        .admin-container {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .stats-card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .assignment-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+        }
+        
+        .btn-assign {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-assign:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+    </style>
+</head>
+<body class="admin-container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                🎓 Congreso Estudiantil - Panel de Administración
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">👨‍💼 Administrador</span>
+                <a class="nav-link" href="#" onclick="logout()">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="card stats-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📊 Navegación</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary active" onclick="showSection('assignments')">
+                                📋 Asignaciones
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="showSection('works')">
+                                📝 Trabajos Pendientes
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="showSection('evaluators')">
+                                👨‍🏫 Evaluadores
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Panel de Acciones Rápidas -->
+                <div class="card stats-card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">⚡ Acciones Rápidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-assign" onclick="assignAllPendingWorks()">
+                                🎯 Asignar Trabajos Pendientes
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="reassignAllWorks()">
+                                🔄 Reasignar Todos los Trabajos
+                            </button>
+                            <button class="btn btn-outline-info" onclick="viewAssignmentStats()">
+                                📊 Ver Estadísticas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contenido Principal -->
+            <div class="col-lg-9">
+                <!-- Sección de Asignaciones -->
+                <div id="assignmentsSection">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Gestión de Asignaciones</h2>
+                        <div>
+                            <button class="btn btn-outline-success me-2" onclick="assignAllPendingWorks()">
+                                🎯 Asignar Pendientes
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="refreshAssignments()">
+                                🔄 Actualizar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Estadísticas -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h4 id="totalWorks">0</h4>
+                                    <small>Total Trabajos</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h4 id="pendingWorks">0</h4>
+                                    <small>Pendientes de Asignar</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h4 id="assignedWorks">0</h4>
+                                    <small>Asignados</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h4 id="completedWorks">0</h4>
+                                    <small>Evaluados</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de Asignaciones -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">📋 Todas las Asignaciones</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="assignmentsList">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-2">Cargando asignaciones...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección de Trabajos Pendientes -->
+                <div id="worksSection" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Trabajos Pendientes de Asignación</h2>
+                        <button class="btn btn-success" onclick="assignAllPendingWorks()">
+                            🎯 Asignar Todos
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="pendingWorksList">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-2">Cargando trabajos pendientes...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección de Evaluadores -->
+                <div id="evaluatorsSection" class="d-none">
+                    <h2>Gestión de Evaluadores</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="evaluatorsList">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-2">Cargando evaluadores...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Progreso -->
+    <div class="modal fade" id="progressModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="progressModalTitle">Procesando...</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="progress mb-3">
+                        <div id="assignmentProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p id="progressMessage" class="mb-0">Iniciando asignación de trabajos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/evaluation-assignment.js"></script>
+    <script>
+        // Variables globales
+        let currentSection = 'assignments';
+        let allWorks = [];
+        let pendingWorks = [];
+        let assignmentSystem = new EvaluationAssignment();
+        let progressModal = null;
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAuth();
+            progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
+            loadAdminDashboard();
+        });
+        
+        // Verificar que el usuario es administrador
+        async function checkAdminAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (!session || error) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const user = session.user;
+            const profile = await getUserProfile(user.id);
+            if (!profile || profile.user_type !== 'admin') {
+                alert('❌ No tienes permisos de administrador');
+                window.location.href = 'student-dashboard.html';
+            }
+        }
+        
+        // Cargar panel de administración
+        async function loadAdminDashboard() {
+            try {
+                console.log('👨‍💼 Cargando panel de administración...');
+                await loadAllWorks();
+                await loadAllAssignments();
+                await loadEvaluators();
+                updateStatistics();
+                
+            } catch (error) {
+                console.error('❌ Error cargando panel admin:', error);
+                showError('assignmentsList', 'Error: ' + error.message);
+            }
+        }
+
+        // Cargar trabajos - VERSIÓN SIMPLIFICADA
+// Cargar trabajos - VERSIÓN MEJORADA
+async function loadAllWorks() {
+    try {
+        const { data, error } = await supabase
+            .from('works')
+            .select('*');
+        
+        if (error) throw error;
+
+        // Enriquecer con datos de user_profiles, manejando casos nulos
+        const enrichedWorks = await Promise.all(
+            data.map(async (work) => {
+                if (!work.user_profile_id) {
+                    console.warn(`⚠️ Work ${work.id} tiene user_profile_id null`);
+                    return {
+                        ...work,
+                        student_name: 'Estudiante no asignado',
+                        user_type: 'desconocido',
+                        ems11: 'N/A'
+                    };
+                }
+
+                const { data: profile, error: profileError } = await supabase
+                    .from('user_profiles')
+                    .select('name, user_type, ems11')
+                    .eq('id', work.user_profile_id)
+                    .single();
+
+                if (profileError) {
+                    console.warn(`⚠️ Error cargando perfil para work ${work.id}:`, profileError);
+                    return {
+                        ...work,
+                        student_name: 'Error cargando perfil',
+                        user_type: 'error',
+                        ems11: 'N/A'
+                    };
+                }
+
+                return {
+                    ...work,
+                    student_name: profile?.name || 'Sin nombre',
+                    user_type: profile?.user_type || 'No especificado',
+                    ems11: profile?.ems11 || 'N/A'
+                };
+            })
+        );
+
+        allWorks = enrichedWorks;
+        pendingWorks = allWorks.filter(work => work.status === 'pending');
+        
+        console.log('Trabajos cargados:', allWorks);
+        return allWorks;
+        
+    } catch (error) {
+        console.error('Error cargando trabajos:', error);
+        throw error;
+    }
+}
+        // Cargar todas las asignaciones - VERSIÓN SIMPLIFICADA
+        async function loadAllAssignments() {
+            try {
+                // Primero carga las asignaciones básicas
+                const { data: assignments, error } = await supabase
+                    .from('evaluation_assignments')
+                    .select('*')
+                    .order('assigned_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Luego enriquece con datos de works y user_profiles
+                const enrichedAssignments = await Promise.all(
+                    assignments.map(async (assignment) => {
+                        // Obtener datos del trabajo
+                        const { data: workData } = await supabase
+                            .from('works')
+                            .select('*')
+                            .eq('id', assignment.work_id)
+                            .single();
+
+                        // Obtener datos del estudiante
+                        const { data: studentData } = await supabase
+                            .from('user_profiles')
+                            .select('name')
+                            .eq('id', workData?.user_profile_id)
+                            .single();
+
+                        // Obtener datos del evaluador
+                        const { data: evaluatorData } = await supabase
+                            .from('user_profiles')
+                            .select('name, email')
+                            .eq('id', assignment.evaluator_id)
+                            .single();
+
+                        return {
+                            ...assignment,
+                            works: {
+                                ...workData,
+                                student_name: studentData?.name
+                            },
+                            user_profiles: evaluatorData
+                        };
+                    })
+                );
+
+                displayAllAssignments(enrichedAssignments);
+                return enrichedAssignments;
+                
+            } catch (error) {
+                console.error('Error cargando asignaciones:', error);
+                throw error;
+            }
+        }
+
+        // Cargar evaluadores
+        async function loadEvaluators() {
+            try {
+                const { data: evaluators, error } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('user_type', 'evaluator')
+                    .order('name');
+                
+                if (error) throw error;
+                
+                displayEvaluators(evaluators || []);
+                
+            } catch (error) {
+                console.error('Error cargando evaluadores:', error);
+                throw error;
+            }
+        }
+
+        // FUNCIÓN PRINCIPAL: Asignar todos los trabajos pendientes
+        async function assignAllPendingWorks() {
+            try {
+                if (pendingWorks.length === 0) {
+                    alert('✅ No hay trabajos pendientes para asignar');
+                    return;
+                }
+                
+                // Mostrar modal de progreso
+                document.getElementById('progressModalTitle').textContent = 'Asignando Trabajos';
+                document.getElementById('progressMessage').textContent = `Procesando ${pendingWorks.length} trabajos...`;
+                progressModal.show();
+                
+                let assignedCount = 0;
+                let errorCount = 0;
+                
+                // Asignar cada trabajo pendiente
+                for (let i = 0; i < pendingWorks.length; i++) {
+                    const work = pendingWorks[i];
+                    
+                    // Actualizar progreso
+                    const progress = ((i + 1) / pendingWorks.length) * 100;
+                    document.getElementById('assignmentProgress').style.width = `${progress}%`;
+                    document.getElementById('progressMessage').textContent = 
+                        `Asignando: "${work.title}" (${i + 1}/${pendingWorks.length})`;
+                    
+                    try {
+                        const result = await assignmentSystem.assignWorksToEvaluators(work.id, 3);
+                        
+                        if (result.success) {
+                            assignedCount++;
+                            console.log(`✅ Trabajo asignado: ${work.title}`);
+                        } else {
+                            errorCount++;
+                            console.error(`❌ Error asignando trabajo: ${work.title}`, result.error);
+                        }
+                    } catch (error) {
+                        errorCount++;
+                        console.error(`❌ Error asignando trabajo: ${work.title}`, error);
+                    }
+                    
+                    // Pequeña pausa para no saturar
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                // Cerrar modal y mostrar resultados
+                progressModal.hide();
+                
+                if (errorCount === 0) {
+                    alert(`✅ ¡Éxito! Se asignaron ${assignedCount} trabajos a los evaluadores.`);
+                } else {
+                    alert(`⚠️ Se asignaron ${assignedCount} trabajos, pero hubo ${errorCount} errores. Revisa la consola para más detalles.`);
+                }
+                
+                // Recargar datos
+                await loadAdminDashboard();
+                
+            } catch (error) {
+                console.error('❌ Error en asignación masiva:', error);
+                progressModal.hide();
+                alert('❌ Error durante la asignación: ' + error.message);
+            }
+        }
+        
+        // Reasignar todos los trabajos
+        async function reassignAllWorks() {
+            if (!confirm('⚠️ ¿Estás seguro? Esto eliminará todas las asignaciones existentes y creará nuevas asignaciones aleatorias para TODOS los trabajos.')) {
+                return;
+            }
+            
+            try {
+                // Eliminar todas las asignaciones existentes
+                const { error: deleteError } = await supabase
+                    .from('evaluation_assignments')
+                    .delete()
+                    .neq('id', '00000000-0000-0000-0000-000000000000');
+                
+                if (deleteError) throw deleteError;
+                
+                // Resetear estado de todos los trabajos a "pending"
+                const { error: updateError } = await supabase
+                    .from('works')
+                    .update({ status: 'pending' })
+                    .neq('id', '00000000-0000-0000-0000-000000000000');
+                
+                if (updateError) throw updateError;
+                
+                // Recargar datos y asignar
+                await loadAdminDashboard();
+                await assignAllPendingWorks();
+                
+            } catch (error) {
+                console.error('❌ Error reasignando trabajos:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        // Mostrar estadísticas de asignación
+        function viewAssignmentStats() {
+            const total = allWorks.length;
+            const pending = pendingWorks.length;
+            const assigned = allWorks.filter(w => w.status === 'under_review').length;
+            const completed = allWorks.filter(w => 
+                w.status === 'accepted_oral' || w.status === 'accepted_poster' || w.status === 'rejected'
+            ).length;
+            
+            alert(`📊 Estadísticas de Asignación:
+            
+    • Total de trabajos: ${total}
+    • Pendientes de asignar: ${pending}
+    • Asignados a evaluadores: ${assigned}
+    • Evaluaciones completadas: ${completed}
+
+    • Evaluadores activos: ${document.getElementById('evaluatorsList').querySelectorAll('.evaluator-card').length}
+            `);
+        }
+        
+        // Funciones de visualización
+        function displayAllAssignments(assignments) {
+            const container = document.getElementById('assignmentsList');
+            if (!container) return;
+            
+            if (!assignments || assignments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-muted">No hay asignaciones en el sistema</p>
+                        <button class="btn btn-success mt-2" onclick="assignAllPendingWorks()">
+                            🎯 Asignar Trabajos Pendientes
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = assignments.map(assignment => {
+                const work = assignment.works;
+                const evaluator = assignment.user_profiles;
+                const statusInfo = getAssignmentStatusInfo(assignment.status);
+                
+                return `
+                    <div class="assignment-card card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary mb-1">${work?.title || 'Trabajo no encontrado'}</h6>
+                                    <p class="mb-1 small text-muted">
+                                        <strong>Estudiante:</strong> ${work?.student_name || 'N/A'} |
+                                        <strong>Evaluador:</strong> ${evaluator?.name || 'N/A'}
+                                    </p>
+                                    <p class="mb-0 small text-muted">
+                                        Asignado: ${new Date(assignment.assigned_at).toLocaleDateString()}
+                                        ${assignment.completed_at ? 
+                                            `| Completado: ${new Date(assignment.completed_at).toLocaleDateString()}` : 
+                                            ''
+                                        }
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    ${statusInfo.badge}
+                                    <br>
+                                    <small class="text-muted">${work?.status || 'N/A'}</small>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <small class="text-muted">
+                                        ${assignment.id.substring(0, 8)}...
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function displayPendingWorks() {
+            const container = document.getElementById('pendingWorksList');
+            if (!container) return;
+            
+            if (!pendingWorks || pendingWorks.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-muted">✅ No hay trabajos pendientes de asignación</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = pendingWorks.map(work => {
+                const daysAgo = getDaysAgo(work.submitted_at);
+                
+                return `
+                    <div class="assignment-card card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="text-primary mb-1">${work.title}</h6>
+                                    <p class="mb-1 small text-muted">
+                                        <strong>Estudiante:</strong> ${work.student_name || 'N/A'} |
+                                        <strong>Modalidad:</strong> ${work.modality}
+                                    </p>
+                                    <p class="mb-0 small text-muted">
+                                        Enviado hace ${daysAgo} días
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button class="btn btn-sm btn-success" onclick="assignSingleWork('${work.id}')">
+                                        🎯 Asignar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function displayEvaluators(evaluators) {
+            const container = document.getElementById('evaluatorsList');
+            if (!container) return;
+            
+            if (!evaluators || evaluators.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <p class="text-muted">No hay evaluadores registrados</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = evaluators.map(evaluator => {
+                return `
+                    <div class="evaluator-card card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">${evaluator.name}</h6>
+                                    <p class="mb-0 small text-muted">${evaluator.email}</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-primary">Evaluador</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Asignar un trabajo individual
+        async function assignSingleWork(workId) {
+            try {
+                const work = allWorks.find(w => w.id === workId);
+                if (!work) {
+                    alert('❌ Trabajo no encontrado');
+                    return;
+                }
+                
+                const result = await assignmentSystem.assignWorksToEvaluators(workId, 3);
+                
+                if (result.success) {
+                    alert(`✅ Trabajo "${work.title}" asignado a ${result.assignments.length} evaluadores`);
+                    await loadAdminDashboard();
+                } else {
+                    alert('❌ Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error asignando trabajo individual:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+        
+        // Actualizar estadísticas
+        function updateStatistics() {
+            const total = allWorks.length;
+            const pending = pendingWorks.length;
+            const assigned = allWorks.filter(w => w.status === 'under_review').length;
+            const completed = allWorks.filter(w => 
+                w.status === 'accepted_oral' || w.status === 'accepted_poster' || w.status === 'rejected'
+            ).length;
+            
+            document.getElementById('totalWorks').textContent = total;
+            document.getElementById('pendingWorks').textContent = pending;
+            document.getElementById('assignedWorks').textContent = assigned;
+            document.getElementById('completedWorks').textContent = completed;
+        }
+        
+        // Funciones de navegación
+        function showSection(sectionName) {
+            // Ocultar todas las secciones
+            document.getElementById('assignmentsSection').classList.add('d-none');
+            document.getElementById('worksSection').classList.add('d-none');
+            document.getElementById('evaluatorsSection').classList.add('d-none');
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionName + 'Section').classList.remove('d-none');
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.btn-outline-primary, .btn-outline-secondary').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Cargar datos específicos de la sección si es necesario
+            if (sectionName === 'works') {
+                displayPendingWorks();
+            }
+        }
+        
+        // Refrescar asignaciones
+        async function refreshAssignments() {
+            await loadAdminDashboard();
+            alert('✅ Datos actualizados');
+        }
+        
+        // Cerrar sesión
+        async function logout() {
+            try {
+                await logoutUser();
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error cerrando sesión:', error);
+            }
+        }
+        
+        // Mostrar error
+        function showError(containerId, message) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> ${message}
+                    </div>
+                `;
+            }
+        }
+
+        // Funciones auxiliares (deben estar definidas en otros archivos)
+        function getAssignmentStatusInfo(status) {
+            const statusMap = {
+                'pending': { badge: '<span class="badge bg-warning">Pendiente</span>', text: 'Pendiente' },
+                'under_review': { badge: '<span class="badge bg-info">En Revisión</span>', text: 'En Revisión' },
+                'completed': { badge: '<span class="badge bg-success">Completado</span>', text: 'Completado' }
+            };
+            return statusMap[status] || { badge: '<span class="badge bg-secondary">Desconocido</span>', text: 'Desconocido' };
+        }
+
+        function getDaysAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+    </script>
+</body>
+</html>

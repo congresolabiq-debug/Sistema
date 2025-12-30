@@ -1,0 +1,175 @@
+/* Estilos generales */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Hero section */
+.hero-section {
+    padding: 3rem 0;
+}
+
+.hero-section h1 {
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.hero-section .lead {
+    color: #6c757d;
+    font-size: 1.25rem;
+}
+
+/* Tarjetas */
+.card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.icon-container {
+    font-size: 3rem;
+}
+
+.step {
+    text-align: center;
+    padding: 1rem;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin: 0 auto 1rem auto;
+}
+
+/* Login */
+.login-container {
+max-width: 2000px; /* Ancho máximo fijo */
+   min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 2rem 0;
+}
+
+/* Tarjeta del login */
+.login-card {
+    border-radius: 12px;
+    border: none;
+    margin: 0 auto; /* Centrar horizontalmente */
+    width: 500%;
+    max-width: 20000px; /* Ancho máximo fijo */
+    
+}
+
+/* Asegurar que el formulario ocupe todo el ancho */
+.login-card .card-body {
+    padding: 2rem;
+}
+
+/* Inputs del login */
+.login-card .form-control {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.login-card .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Botón del login */
+.login-card .btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+}
+
+.credential-test {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+/* Trabajos */
+.work-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.work-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+.work-card h5 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+/* Estados */
+.status-pendiente { color: #f39c12; font-weight: 600; }
+.status-en-revision { color: #3498db; font-weight: 600; }
+.status-aceptado { color: #27ae60; font-weight: 600; }
+.status-rechazado { color: #e74c3c; font-weight: 600; }
+
+/* Botones */
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 2rem 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .step {
+        margin-bottom: 2rem;
+    }
+
+     .login-container {
+        padding: 1rem;
+    }
+    
+    .login-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .login-card {
+        margin: 0 1rem;
+    }
+}
+
+/* Navbar personalizada */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
