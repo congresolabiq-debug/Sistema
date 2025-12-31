@@ -97,7 +97,14 @@ const apiClient = {
             status: status,
             final_score: finalScore
         });
-    }
+    },
+
+    async finalizeAndNotify(workId) {
+        return await postData({
+            action: 'finalizeAndNotify',
+            work_id: workId
+        });
+    },
 };
 
 // --- HELPERS ---
