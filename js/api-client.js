@@ -1,5 +1,5 @@
 // --- CONFIGURACIÓN ---
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxGzFJhSWfnNLNpugqtYZAdJCDdi7OKsVuimAKeI-CxpKftgTbgJz_QTJjf1MLGAi24w/exec'; 
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_W5ZMzbUY-VQ0TgWqAKTGnB38EAWUfbTbXF_wICylArzTcy8KO_2FQho2FeXtGHdmdA/exec'; 
 
 // --- GESTIÓN DE SESIÓN LOCAL ---
 function saveSession(user) { localStorage.setItem('congreso_user', JSON.stringify(user)); }
