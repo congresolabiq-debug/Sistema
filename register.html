@@ -7,63 +7,51 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="index.html">🎓 Congreso Académico</a>
         </div>
     </nav>
 
-    <div class="container login-container">
+    <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5">
-                <div class="card login-card shadow">
-                    <div class="card-header text-center">
-                        <h4 class="mb-0">Crear Cuenta</h4>
-                    </div>
+            <div class="col-md-5">
+                <div class="card shadow border-0">
                     <div class="card-body p-4">
+                        <h3 class="text-center mb-4">Crear Cuenta</h3>
                         <form id="registerForm">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Nombre Completo *</label>
-                                <input type="text" class="form-control" id="name" placeholder="Juan Pérez García" required>
+                                <label class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="name" required>
                             </div>
                             <div class="mb-3">
-                                <label for="email" class="form-label">Correo Electrónico *</label>
-                                <input type="email" class="form-control" id="email" placeholder="tu@ejemplo.com" required>
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="email" required>
                             </div>
+                            
                             <div class="mb-3">
-                                <label for="userType" class="form-label">Tipo de Usuario *</label>
-                                <select class="form-select" id="userType" required>
-                                    <option value="">Seleccionar tipo de usuario...</option>
+                                <label class="form-label">Tipo de Usuario</label>
+                                <select class="form-select" id="userType" onchange="toggleAdminCode()" required>
                                     <option value="student">Alumno</option>
                                     <option value="evaluator">Evaluador/Profesor</option>
                                 </select>
                             </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña *</label>
-                                <input type="password" class="form-control" id="password" placeholder="••••••••" minlength="6" required>
-                                <div class="form-text">Mínimo 6 caracteres</div>
+
+                            <!-- CAMPO OCULTO DE CÓDIGO -->
+                            <div class="mb-3 d-none" id="adminCodeGroup">
+                                <label class="form-label text-danger fw-bold">Código de Acceso Docente *</label>
+                                <input type="password" class="form-control border-danger" id="adminCode" placeholder="Ingresa la clave de profesor">
+                                <div class="form-text text-danger">Solo personal autorizado puede registrarse como evaluador.</div>
                             </div>
+
                             <div class="mb-3">
-                                <label for="confirmPassword" class="form-label">Confirmar Contraseña *</label>
-                                <input type="password" class="form-control" id="confirmPassword" placeholder="••••••••" required>
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" minlength="6" required>
                             </div>
                             
-                            <div class="alert alert-info">
-                                <strong>ℹ️ Información importante:</strong><br>
-                                • Los evaluadores deben ser aprobados por el comité organizador<br>
-                                • Los alumnos pueden enviar múltiples trabajos<br>
-                                • Recibirás un email de confirmación
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100 py-2">
-                                <span id="registerText">Crear Cuenta</span>
-                                <div id="registerSpinner" class="spinner-border spinner-border-sm d-none" role="status">
-                                    <span class="visually-hidden">Cargando...</span>
-                                </div>
-                            </button>
+                            <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Registrarse</button>
                         </form>
-                        
                         <div class="text-center mt-3">
                             <a href="login.html">¿Ya tienes cuenta? Inicia Sesión</a>
                         </div>
@@ -72,7 +60,54 @@
             </div>
         </div>
     </div>
-<script src="js/api-client.js"></script> 
-<script src="js/app.js"></script>
+
+    <script src="js/api-client.js"></script>
+    <script>
+        // Mostrar/Ocultar campo de código
+        function toggleAdminCode() {
+            const type = document.getElementById('userType').value;
+            const codeGroup = document.getElementById('adminCodeGroup');
+            if (type === 'evaluator') {
+                codeGroup.classList.remove('d-none');
+                document.getElementById('adminCode').required = true;
+            } else {
+                codeGroup.classList.add('d-none');
+                document.getElementById('adminCode').required = false;
+                document.getElementById('adminCode').value = '';
+            }
+        }
+
+        // Manejo del Registro
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const type = document.getElementById('userType').value;
+            const pass = document.getElementById('password').value;
+            const adminCode = document.getElementById('adminCode').value;
+
+            // VALIDACIÓN DE SEGURIDAD
+            if (type === 'evaluator') {
+                if (adminCode.toLowerCase() !== 'zaragoza') {
+                    alert('⛔ CÓDIGO INCORRECTO.\nNo tienes autorización para registrarte como Evaluador.');
+                    return;
+                }
+            }
+
+            const btn = document.querySelector('button[type="submit"]');
+            btn.disabled = true; btn.innerText = "Registrando...";
+
+            const result = await window.apiClient.registerUser(email, pass, name, type);
+            
+            if (result.success) {
+                alert('✅ Cuenta creada exitosamente.');
+                window.location.href = 'login.html';
+            } else {
+                alert('❌ Error: ' + result.error);
+                btn.disabled = false; btn.innerText = "Registrarse";
+            }
+        });
+    </script>
 </body>
 </html>
