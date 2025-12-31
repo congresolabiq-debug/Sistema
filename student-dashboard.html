@@ -42,109 +42,31 @@
     </div>
 
     <!-- Scripts existentes -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/app.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const session = await window.apiClient.checkAuth();
+        if(!session) return window.location.href = 'login.html';
 
-    <!-- NUEVO SCRIPT PARA EL DASHBOARD DEL ALUMNO -->
-    <script>
-        // Funciones específicas para el dashboard del alumno
-        async function loadStudentWorks() {
-            try {
-                console.log('📥 Cargando trabajos del alumno...');
-                
-                const { data: { user }, error: userError } = await supabase.auth.getUser();
-                if (userError) throw userError;
-                if (!user) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                console.log('👤 Usuario:', user.id);
-
-                // Cargar trabajos del usuario actual desde Supabase
-                const works = await getStudentWorks(user.id);
-                console.log('📋 Trabajos encontrados:', works);
-                
-                displayWorks(works, 'student');
-                
-            } catch (error) {
-                console.error('❌ Error cargando trabajos:', error);
-                const worksContainer = document.getElementById('worksList');
-                if (worksContainer) {
-                    worksContainer.innerHTML = `
-                        <div class="alert alert-danger">
-                            <strong>Error cargando trabajos:</strong> ${error.message}
-                            <br><small>Verifica la consola para más detalles</small>
-                        </div>
-                    `;
-                }
-            }
+        const works = await window.apiClient.getStudentWorks(session.user.id);
+        const container = document.getElementById('worksList');
+        
+        if(works.length === 0) {
+            container.innerHTML = '<p class="text-center mt-5">No has enviado trabajos.</p>';
+            return;
         }
 
-        // Función mejorada para mostrar trabajos
-        function displayWorks(works, userType) {
-            const worksContainer = document.getElementById('worksList');
-            if (!worksContainer) return;
-            
-            if (!works || works.length === 0) {
-                worksContainer.innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="text-muted">
-                            <p class="h3">📝</p>
-                            <p class="h5">No hay trabajos enviados</p>
-                            <p class="mb-0">Envía tu primer trabajo usando el botón "Nuevo Trabajo"</p>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
-            worksContainer.innerHTML = works.map(work => {
-                const statusClass = `status-${work.status.toLowerCase().replace(' ', '-')}`;
-                const statusText = getStatusText(work.status);
-                
-                return `
-                    <div class="work-card">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h5 class="text-primary">${work.title}</h5>
-                                <p class="mb-1"><strong>Estado:</strong> <span class="${statusClass}">${statusText}</span></p>
-                                <p class="mb-1"><strong>Fecha de envío:</strong> ${new Date(work.submitted_at).toLocaleDateString('es-ES')}</p>
-                                <p class="mb-1"><strong>Modalidad:</strong> ${work.modality === 'ponencia' ? 'Ponencia' : 'Póster'}</p>
-                                <p class="mb-1"><strong>Archivo:</strong> 
-                                    <a href="${work.file_url}" target="_blank" class="text-decoration-none">
-                                        📎 Ver archivo
-                                    </a>
-                                </p>
-                            </div>
-                            <div class="ms-3">
-                                <span class="badge bg-${work.modality === 'ponencia' ? 'primary' : 'success'}">
-                                    ${work.modality === 'ponencia' ? 'Ponencia' : 'Póster'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Función para obtener texto del estado
-        function getStatusText(status) {
-            const statusMap = {
-                'pending': '📝 Pendiente de revisión',
-                'under_review': '🔍 En revisión',
-                'accepted_oral': '✅ Aceptado como Ponencia',
-                'accepted_poster': '✅ Aceptado como Póster',
-                'rejected': '❌ Rechazado'
-            };
-            return statusMap[status] || status;
-        }
-
-        // Llamar a la función cuando se cargue la página
-        document.addEventListener('DOMContentLoaded', function() {
-            loadStudentWorks();
-        });
-    </script>
+        container.innerHTML = works.map(w => `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>${w.title}</h5>
+                    <span class="badge bg-${w.status === 'pending' ? 'warning' : 'success'}">${w.status}</span>
+                    <small>${w.modality}</small>
+                    <a href="${w.file_url}" target="_blank" class="btn btn-sm btn-outline-primary float-end">Ver PDF</a>
+                </div>
+            </div>
+        `).join('');
+    });
+</script>
 </body>
 </html>

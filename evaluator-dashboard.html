@@ -3,1039 +3,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel del Evaluador - Portal Congreso</title>
+    <title>Panel de Evaluador - Congreso</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    
     <style>
-        .evaluator-container {
-            min-height: 100vh;
-            background: #f8f9fa;
-        }
+        body { background-color: #f4f6f9; }
+        .work-card { transition: transform 0.2s; border-left: 5px solid #0d6efd; border-radius: 10px; }
+        .work-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         
-        .stats-card {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-        
-        .stats-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .work-item-card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
-        }
-        
-        .work-item-card:hover {
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-        
-        .filter-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
-        }
-        
-        .evaluation-modal {
-            max-width: 800px;
-        }
-        
-        .criteria-item {
-            padding: 1rem;
+        /* Estilos para la rúbrica */
+        .criteria-container {
+            background: #fff;
             border: 1px solid #e9ecef;
             border-radius: 8px;
-            margin-bottom: 1rem;
-            background: #fafafa;
-            transition: all 0.3s ease;
-            padding: 1rem;
+            padding: 15px;
+            margin-bottom: 15px;
         }
-         .criteria-item:hover {
-    background: #f0f8ff;
-    border-color: #007bff;
-}
-
-.form-range {
-    height: 1.5rem;
-}
-
-.form-range::-webkit-slider-thumb {
-    background: #007bff;
-}
-
-.form-range::-moz-range-thumb {
-    background: #007bff;
-}
-
-.score-summary {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    color: white;
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-/* Scroll personalizado para el modal */
-.modal-body {
-    max-height: 70vh;
-    overflow-y: auto;
-}
-
-/* Estilos para los badges de puntuación */
-.score-badge {
-    font-size: 0.9rem;
-    padding: 0.35rem 0.75rem;
-        }      
-        .status-badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.35rem 0.75rem;
-            border-radius: 20px;
+        .criteria-title { color: #0d6efd; font-weight: 700; margin-bottom: 5px; }
+        .criteria-desc { font-size: 0.85rem; color: #6c757d; margin-bottom: 10px; padding-left: 10px; border-left: 3px solid #dee2e6; }
+        .criteria-desc ul { margin-bottom: 0; padding-left: 15px; }
+        .range-value { font-weight: bold; min-width: 45px; text-align: right; }
+        
+        .section-header {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #495057;
         }
     </style>
 </head>
-<body class="evaluator-container">
+<body>
+
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html">
-                🎓 Congreso Estudiantil "Laboratorios de Ingeniería Química"
-            </a>
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">👨‍🏫 Panel del Evaluador</span>
-                <a class="nav-link" href="index.html">Cerrar Sesión</a>
-            </div>
+            <a class="navbar-brand fw-bold" href="#">👨‍🏫 Panel del Evaluador</a>
+            <button class="btn btn-outline-light btn-sm" onclick="logout()">Cerrar Sesión</button>
         </div>
     </nav>
 
-    <div class="container-fluid py-4">
-        <div class="row">
-            <!-- Sidebar de Filtros -->
-            <div class="col-lg-3 mb-4">
-                <div class="filter-section">
-                    <h5 class="mb-3">🔍 Filtros</h5>
-                    
-                    <!-- Filtro por Estado -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Estado</label>
-                        <select class="form-select" id="filterStatus">
-                            <option value="all">Todos los estados</option>
-                            <option value="pending">📝 Pendientes</option>
-                            <option value="under_review">🔍 En revisión</option>
-                            <option value="accepted_oral">✅ Aceptados (Ponencia)</option>
-                            <option value="accepted_poster">✅ Aceptados (Póster)</option>
-                            <option value="rejected">❌ Rechazados</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Filtro por Modalidad -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Modalidad</label>
-                        <select class="form-select" id="filterModality">
-                            <option value="all">Todas las modalidades</option>
-                            <option value="ponencia">🎤 Ponencia</option>
-                            <option value="poster">📊 Póster</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Filtro por Fecha -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Fecha</label>
-                        <select class="form-select" id="filterDate">
-                            <option value="all">Todas las fechas</option>
-                            <option value="today">Hoy</option>
-                            <option value="week">Esta semana</option>
-                            <option value="month">Este mes</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Búsqueda por Título -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Buscar por título</label>
-                        <input type="text" class="form-control" id="searchTitle" placeholder="Ingresa palabras clave...">
-                    </div>
-                    
-                    <!-- Botones de acción -->
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary" onclick="applyFilters()">
-                            Aplicar Filtros
-                        </button>
-                        <button class="btn btn-outline-secondary" onclick="resetFilters()">
-                            Limpiar Filtros
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Estadísticas Rápidas -->
-                <div class="filter-section">
-                    <h5 class="mb-3">📊 Estadísticas</h5>
-                    <div class="row text-center">
-                        <div class="col-6 mb-3">
-                            <div class="stats-card bg-primary text-white p-3">
-                                <h4 id="totalWorks">0</h4>
-                                <small>Total</small>
-                            </div>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <div class="stats-card bg-warning text-white p-3">
-                                <h4 id="pendingWorks">0</h4>
-                                <small>Pendientes</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stats-card bg-info text-white p-3">
-                                <h4 id="reviewedWorks">0</h4>
-                                <small>Revisados</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stats-card bg-success text-white p-3">
-                                <h4 id="completedWorks">0</h4>
-                                <small>Completados</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Contenido Principal -->
-            <div class="col-lg-9">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mb-0">Trabajos para Evaluar</h2>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary" onclick="refreshWorks()">
-                            🔄 Actualizar
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Lista de Trabajos -->
-                <div id="worksList">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando...</span>
-                        </div>
-                        <p class="mt-2">Cargando trabajos...</p>
-                    </div>
-                </div>
-            </div>
+    <div class="container">
+        <h2 class="mb-4 text-secondary">Trabajos Asignados</h2>
+        
+        <!-- Loading Spinner -->
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Cargando asignaciones...</p>
         </div>
+        
+        <!-- Lista de trabajos -->
+        <div id="worksList" class="row"></div>
     </div>
 
-    <!-- Modal de Evaluación -->
-    <div class="modal fade" id="evaluationModal" tabindex="-1">
-        <div class="modal-dialog modal-lg evaluation-modal">
+    <!-- MODAL DE EVALUACIÓN DETALLADO -->
+    <div class="modal fade" id="evaluationModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Evaluar Trabajo</h5>
+                    <h5 class="modal-title">📝 Evaluación del Trabajo</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div id="evaluationContent">
-                        <!-- Contenido dinámico se cargará aquí -->
+                <div class="modal-body bg-light">
+                    
+                    <!-- Info del trabajo -->
+                    <div class="card mb-3 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 id="modalWorkTitle" class="card-title text-primary fw-bold">Título</h5>
+                            <a id="modalWorkLink" href="#" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                                📄 Ver Documento PDF
+                            </a>
+                        </div>
                     </div>
+
+                    <form id="evaluationForm">
+                        
+                        <!-- PARTE 1 -->
+                        <div class="section-header">PARTE 1: Contenido y Estructura</div>
+
+                        <!-- 1. Resumen -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">1. Resumen</label>
+                                <span class="badge bg-secondary">Máx 10%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Presenta la estructura del contenido del documento y de cómo desarrolló la investigación.</li>
+                                    <li>¿Qué se hizo?, ¿Cuál fue el resultado obtenido?</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="10" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. Justificación -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">2. Justificación</label>
+                                <span class="badge bg-secondary">Máx 10%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Aborda un problema, demanda o necesidad detectada.</li>
+                                    <li>Expresa con claridad las ideas clave en la formulación del problema de investigación.</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="10" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Objetivos -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">3. Objetivos</label>
+                                <span class="badge bg-secondary">Máx 15%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Plantea un objetivo general y específicos de manera clara y concisa.</li>
+                                    <li>La redacción respeta el nivel taxonómico (Bloom).</li>
+                                    <li>El objetivo general se refiere a la solución del problema mediante métodos/técnicas apropiadas.</li>
+                                    <li>Los objetivos específicos detallan los procesos necesarios (habilidades y conocimientos).</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="15" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. Introducción -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">4. Introducción</label>
+                                <span class="badge bg-secondary">Máx 10%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Sustenta el desarrollo a través de un contraste de diversas teorías.</li>
+                                    <li>La información es congruente con los objetivos.</li>
+                                    <li>Sustenta la información con referencias bibliográficas.</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="10" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 5. Metodología -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">5. Metodología</label>
+                                <span class="badge bg-secondary">Máx 10%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Describe material, herramientas, equipos y procedimientos utilizados.</li>
+                                    <li>El desarrollo es congruente con el contenido temático.</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="10" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 6. Resultados y Análisis -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">6. Resultados y Análisis</label>
+                                <span class="badge bg-secondary">Máx 15%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Tratamiento de datos (numéricos, gráficos, analíticos, etc.).</li>
+                                    <li>Análisis e interpretación con redacción clara usando cuadros y figuras.</li>
+                                    <li>Respeta el formato establecido para tablas y gráficas.</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="15" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 7. Conclusiones -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">7. Conclusiones</label>
+                                <span class="badge bg-secondary">Máx 15%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Analiza y reflexiona sobre resultados.</li>
+                                    <li>Relaciona resultados con el cumplimiento de objetivos.</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="15" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 8. Referencias -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">8. Referencias</label>
+                                <span class="badge bg-secondary">Máx 5%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul>
+                                    <li>Bibliografía actual (libros, manuales, revistas científicas).</li>
+                                    <li>Respeta formato APA 7.</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="5" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- PARTE 2 -->
+                        <div class="section-header">PARTE 2: Criterios Complementarios e Integrales</div>
+
+                        <!-- 9. Factibilidad -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">Factibilidad y pertinencia</label>
+                                <span class="badge bg-info text-dark">Máx 2%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul><li>Integra conceptos de diseño/operación de procesos para obtener un producto.</li></ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="2" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 10. Innovación -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">Innovación</label>
+                                <span class="badge bg-info text-dark">Máx 2%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul><li>Identifica y resuelve problemas aplicando ingeniería química básica/aplicada.</li></ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="2" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 11. Integración -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">Integración de conocimientos</label>
+                                <span class="badge bg-info text-dark">Máx 2%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul><li>Integra conocimientos de otras asignaturas de ciencia/ingeniería.</li></ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="2" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 12. Cumplimiento -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">Cumplimiento del Programa</label>
+                                <span class="badge bg-info text-dark">Máx 2%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul><li>Se apega y cumple con los objetivos del semestre.</li></ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="2" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- 13. Ética -->
+                        <div class="criteria-container">
+                            <div class="d-flex justify-content-between">
+                                <label class="criteria-title">Ética y valores</label>
+                                <span class="badge bg-info text-dark">Máx 2%</span>
+                            </div>
+                            <div class="criteria-desc">
+                                <ul><li>Impacta necesidades sociales/ambientales bajo normas o gestión de residuos.</li></ul>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range score-input me-3" min="0" max="2" step="1" value="0" oninput="updateTotal()">
+                                <span class="range-value text-primary">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- TOTAL -->
+                        <div class="card bg-primary text-white text-center mb-4 sticky-bottom shadow">
+                            <div class="card-body">
+                                <h3 class="mb-0">Calificación Total: <span id="totalScore">0</span>%</h3>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Modalidad Sugerida por el Evaluador *</label>
+                            <select class="form-select form-select-lg" id="modalidadSugerida" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="ponencia">Ponencia (Oral)</option>
+                                <option value="poster">Cartel (Póster)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Comentarios y Retroalimentación *</label>
+                            <textarea class="form-control" id="comentarios" rows="3" placeholder="Escribe tus observaciones para el estudiante..." required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success fw-bold px-4" onclick="submitEvaluation()">✅ Enviar Evaluación</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/evaluation-assignment.js"></script> 
+    <script src="js/api-client.js"></script>
+    <script src="js/evaluation-assignment.js"></script>
+
     <script>
-        // Variables globales
-        let allWorks = [];
-        let currentEvaluationWork = null;
+        let currentAssignmentId = null;
+        let currentWorkId = null;
         let evaluationModal = null;
 
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async () => {
             evaluationModal = new bootstrap.Modal(document.getElementById('evaluationModal'));
-            checkEvaluatorAuth();
-            loadEvaluatorWorks();
+            
+            const session = await window.apiClient.checkAuth();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const assignmentSystem = new EvaluationAssignment();
+            const assignments = await assignmentSystem.getAssignedWorks(session.user.id);
+            displayWorks(assignments);
         });
 
-        // Verificar autenticación del evaluador
-        async function checkEvaluatorAuth() {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (!session || error) {
-                window.location.href = 'login.html';
+        function displayWorks(assignments) {
+            const container = document.getElementById('worksList');
+            document.getElementById('loading').classList.add('d-none');
+
+            if (assignments.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center text-muted"><h4>🎉 No tienes trabajos pendientes.</h4></div>';
                 return;
             }
-            
-            // Verificar que el usuario es evaluador
-            const user = session.user;
-            const profile = await getUserProfile(user.id);
-            if (!profile || (profile.user_type !== 'evaluator' && profile.user_type !== 'admin')) {
-                alert('No tienes permisos para acceder al panel de evaluador.');
-                window.location.href = 'student-dashboard.html';
-            }
-        }
 
-// Cargar trabajos para evaluación - VERSIÓN MEJORADA CON DIAGNÓSTICO
-// Cargar trabajos asignados al evaluador actual
-async function loadEvaluatorWorks() {
-    try {
-        console.log('🔍 Cargando trabajos asignados...');
-        
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-            window.location.href = 'login.html';
-            return;
-        }
+            container.innerHTML = assignments.map(a => {
+                const isCompleted = a.status === 'completed';
+                const btnClass = isCompleted ? 'btn-secondary' : 'btn-primary';
+                const btnText = isCompleted ? '✅ Evaluado' : '⭐ Evaluar Trabajo';
+                const disabled = isCompleted ? 'disabled' : '';
+                const onclick = isCompleted ? '' : `onclick="openEvaluation('${a.work_id}', '${a.id}', '${escapeHtml(a.works.title)}', '${a.works.file_url}')"`;
 
-        console.log('👤 Evaluador:', user.id);
-        
-        // Usar el sistema de asignaciones
-        const assignmentSystem = new EvaluationAssignment();
-        const assignedWorks = await assignmentSystem.getAssignedWorks(user.id);
-        
-        console.log('📋 Trabajos asignados:', assignedWorks);
-        
-        // Transformar datos para compatibilidad
-        const works = assignedWorks.map(assignment => ({
-            ...assignment.works,
-            assignment_id: assignment.id,
-            assignment_status: assignment.status
-        }));
-        
-        allWorks = works;
-        updateStatistics(works);
-        displayAssignedWorks(works);
-        
-    } catch (error) {
-        console.error('❌ Error cargando trabajos asignados:', error);
-        showError('Error cargando trabajos asignados: ' + error.message);
-    }
-}
-
-
-// Mostrar trabajos asignados (nueva función)
-function displayAssignedWorks(works) {
-    const worksContainer = document.getElementById('worksList');
-    if (!worksContainer) return;
-    
-    if (!works || works.length === 0) {
-        worksContainer.innerHTML = `
-            <div class="text-center py-5">
-                <div class="text-muted">
-                    <p class="h3">📝</p>
-                    <p class="h5">No hay trabajos asignados</p>
-                    <p class="mb-0">Los trabajos se asignan automáticamente cuando los estudiantes los envían</p>
-                </div>
-            </div>
-        `;
-        return;
-    }
-    
-    worksContainer.innerHTML = works.map(work => {
-        const statusInfo = getStatusInfo(work.status);
-        const assignmentStatus = getAssignmentStatusInfo(work.assignment_status);
-        const studentName = work.user_profiles ? work.user_profiles.name : 'Estudiante';
-        const daysAgo = getDaysAgo(work.submitted_at);
-        
-        return `
-            <div class="work-item-card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h5 class="card-title text-primary">${work.title}</h5>
-                            <p class="card-text mb-2">
-                                <strong>Estudiante:</strong> ${studentName}<br>
-                                <strong>Modalidad:</strong> ${work.modality === 'ponencia' ? '🎤 Ponencia' : '📊 Póster'}<br>
-                                <strong>Enviado:</strong> Hace ${daysAgo} días<br>
-                                <strong>Estado asignación:</strong> ${assignmentStatus.badge}
-                            </p>
-                            <div class="mt-3">
-                                <a href="${work.file_url}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
-                                    📎 Ver Archivo
-                                </a>
-                                <button class="btn btn-sm btn-success" onclick="openEvaluation('${work.id}')" 
-                                    ${work.assignment_status === 'completed' ? 'disabled' : ''}>
-                                    ${work.assignment_status === 'completed' ? '✅ Evaluado' : '⭐ Evaluar'}
-                                </button>
-                                <button class="btn btn-sm btn-outline-info" onclick="viewAssignmentDetails('${work.assignment_id}')">
-                                    📋 Detalles Asignación
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-end">
-                            <span class="status-badge ${statusInfo.class}">
-                                ${statusInfo.icon} ${statusInfo.text}
-                            </span>
-                            <br>
-                            <small class="text-muted mt-2 d-block">
-                                Asignación ID: ${work.assignment_id.substring(0, 8)}...
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Información del estado de asignación
-function getAssignmentStatusInfo(status) {
-    const statusMap = {
-        'assigned': { badge: '<span class="badge bg-warning">📋 Asignado</span>', text: 'Asignado' },
-        'in_progress': { badge: '<span class="badge bg-info">🔍 En Progreso</span>', text: 'En Progreso' },
-        'completed': { badge: '<span class="badge bg-success">✅ Completado</span>', text: 'Completado' }
-    };
-    return statusMap[status] || { badge: '<span class="badge bg-secondary">❓ Desconocido</span>', text: 'Desconocido' };
-}
-
-
-
-        // Actualizar estadísticas
-        function updateStatistics(works) {
-            const total = works.length;
-            const pending = works.filter(work => work.status === 'pending').length;
-            const reviewed = works.filter(work => work.status === 'under_review').length;
-            const completed = works.filter(work => 
-                work.status === 'accepted_oral' || 
-                work.status === 'accepted_poster' || 
-                work.status === 'rejected'
-            ).length;
-
-            document.getElementById('totalWorks').textContent = total;
-            document.getElementById('pendingWorks').textContent = pending;
-            document.getElementById('reviewedWorks').textContent = reviewed;
-            document.getElementById('completedWorks').textContent = completed;
-        }
-
-        // Mostrar trabajos en la lista
-        function displayWorks(works) {
-            const worksContainer = document.getElementById('worksList');
-            if (!worksContainer) return;
-            
-            if (!works || works.length === 0) {
-                worksContainer.innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="text-muted">
-                            <p class="h3">📝</p>
-                            <p class="h5">No hay trabajos para evaluar</p>
-                            <p class="mb-0">Todos los trabajos han sido evaluados</p>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
-            worksContainer.innerHTML = works.map(work => {
-                const statusInfo = getStatusInfo(work.status);
-                const studentName = work.user_profiles ? work.user_profiles.name : 'Estudiante';
-                const daysAgo = getDaysAgo(work.submitted_at);
-                
                 return `
-                    <div class="work-item-card">
+                <div class="col-md-6 mb-4">
+                    <div class="card work-card h-100 shadow-sm">
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <h5 class="card-title text-primary">${work.title}</h5>
-                                    <p class="card-text mb-2">
-                                        <strong>Estudiante:</strong> ${studentName}<br>
-                                        <strong>Modalidad:</strong> ${work.modality === 'ponencia' ? '🎤 Ponencia' : '📊 Póster'}<br>
-                                        <strong>Enviado:</strong> Hace ${daysAgo} días
-                                    </p>
-                                    <div class="mt-3">
-                                        <a href="${work.file_url}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
-                                            📎 Ver Archivo
-                                        </a>
-                                        <button class="btn btn-sm btn-success" onclick="openEvaluation('${work.id}')">
-                                            ⭐ Evaluar
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="viewWorkDetails('${work.id}')">
-                                            👁️ Ver Detalles
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    <span class="status-badge ${statusInfo.class}">
-                                        ${statusInfo.icon} ${statusInfo.text}
-                                    </span>
-                                    <br>
-                                    <small class="text-muted mt-2 d-block">
-                                        ID: ${work.id.substring(0, 8)}...
-                                    </small>
-                                </div>
-                            </div>
+                            <h5 class="card-title text-primary fw-bold">${a.works.title}</h5>
+                            <hr>
+                            <p class="mb-1"><strong>🎓 Estudiante:</strong> ${a.works.student_name || 'N/A'}</p>
+                            <p class="mb-3"><strong>📊 Modalidad solicitada:</strong> ${a.works.modality}</p>
+                            <button class="btn ${btnClass} w-100 fw-bold" ${onclick} ${disabled}>${btnText}</button>
                         </div>
                     </div>
-                `;
+                </div>`;
             }).join('');
         }
 
-        // Información del estado
-        function getStatusInfo(status) {
-            const statusMap = {
-                'pending': { class: 'bg-warning text-dark', icon: '📝', text: 'Pendiente' },
-                'under_review': { class: 'bg-info text-white', icon: '🔍', text: 'En revisión' },
-                'accepted_oral': { class: 'bg-success text-white', icon: '✅', text: 'Ponencia' },
-                'accepted_poster': { class: 'bg-success text-white', icon: '✅', text: 'Póster' },
-                'rejected': { class: 'bg-danger text-white', icon: '❌', text: 'Rechazado' }
+        function openEvaluation(workId, assignmentId, title, url) {
+            currentWorkId = workId;
+            currentAssignmentId = assignmentId;
+            
+            document.getElementById('modalWorkTitle').textContent = title;
+            document.getElementById('modalWorkLink').href = url;
+            
+            // Resetear
+            document.getElementById('evaluationForm').reset();
+            document.querySelectorAll('.range-value').forEach(el => el.textContent = '0%');
+            updateTotal();
+            
+            evaluationModal.show();
+        }
+
+        function updateTotal() {
+            let total = 0;
+            const inputs = document.querySelectorAll('.score-input');
+            
+            inputs.forEach(input => {
+                const val = parseInt(input.value) || 0;
+                total += val;
+                // Actualizar el texto del porcentaje al lado del slider
+                input.nextElementSibling.textContent = val + '%';
+            });
+            
+            const totalElement = document.getElementById('totalScore');
+            totalElement.textContent = total;
+            
+            // Validar visualmente si suma 100 (opcional, pero ayuda)
+            if(total > 100) totalElement.classList.add('text-danger');
+            else totalElement.classList.remove('text-danger');
+        }
+
+        async function submitEvaluation() {
+            const comments = document.getElementById('comentarios').value.trim();
+            const modality = document.getElementById('modalidadSugerida').value;
+            const totalScore = document.getElementById('totalScore').textContent;
+
+            if (!modality || !comments) {
+                alert('⚠️ Por favor selecciona una modalidad y escribe comentarios.');
+                return;
+            }
+
+            if(!confirm(`Calificación Total: ${totalScore}%\n¿Enviar evaluación definitiva?`)) return;
+
+            const btn = document.querySelector('.modal-footer .btn-success');
+            const originalText = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = 'Enviando...';
+
+            const session = await window.apiClient.checkAuth();
+
+            const evaluationData = {
+                work_id: currentWorkId,
+                assignment_id: currentAssignmentId,
+                evaluator_id: session.user.id,
+                total_score: totalScore,
+                modalidad_sugerida: modality,
+                comentarios: comments
             };
-            return statusMap[status] || { class: 'bg-secondary text-white', icon: '❓', text: status };
-        }
 
-        // Calcular días desde el envío
-        function getDaysAgo(dateString) {
-            const submitted = new Date(dateString);
-            const now = new Date();
-            const diffTime = Math.abs(now - submitted);
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
+            const result = await window.apiClient.submitEvaluation(evaluationData);
 
-        // Abrir evaluación
-        async function openEvaluation(workId) {
-            try {
-                const work = allWorks.find(w => w.id === workId);
-                if (!work) {
-                    alert('Trabajo no encontrado');
-                    return;
-                }
-                
-                currentEvaluationWork = work;
-                await showEvaluationModal(work);
-                
-            } catch (error) {
-                console.error('Error abriendo evaluación:', error);
-                alert('Error: ' + error.message);
+            if (result.success) {
+                alert('✅ Evaluación guardada con éxito.');
+                evaluationModal.hide();
+                location.reload();
+            } else {
+                alert('❌ Error: ' + result.error);
+                btn.disabled = false; btn.innerHTML = originalText;
             }
         }
 
-        // Mostrar modal de evaluación ACTUALIZADO
-async function showEvaluationModal(work) {
-    const studentName = work.user_profiles ? work.user_profiles.name : 'Estudiante';
-    
-    const modalContent = `
-        <div class="evaluation-header mb-4">
-            <h4>${work.title}</h4>
-            <p class="text-muted mb-0">
-                <strong>Estudiante:</strong> ${studentName} | 
-                <strong>Modalidad:</strong> ${work.modality === 'ponencia' ? 'Ponencia' : 'Póster'}
-            </p>
-            <a href="${work.file_url}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
-                📎 Abrir archivo completo
-            </a>
-        </div>
-        
-        <div class="alert alert-info">
-            <strong>📋 Palabras clave / Keywords:</strong><br>
-            ${work.abstract.substring(0, 300)}${work.abstract.length > 300 ? '...' : ''}
-        </div>
-        
-        <form id="evaluationForm">
-            <div class="row">
-                <div class="col-md-8">
-                    <h5 class="mb-3">PARTE 1: CRITERIOS DE EVALUACIÓN (85%)</h5>
-                    
-                    <!-- Resumen -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">📄 Resumen (0-10%)</label>
-                        <p class="text-muted small mb-2">Presenta la estructura del contenido del documento y de cómo desarrolló la investigación; ¿Qué se hizo?, ¿Cuál fue el resultado obtenido?</p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="resumenScore" min="0" max="10" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="resumenValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Justificación -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">🎯 Justificación (0-10%)</label>
-                        <p class="text-muted small mb-2">1. Aborda un problema, demanda o necesidad detectada.<br>2. Expresa con claridad las ideas clave en la formulación del problema de investigación.</p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="justificacionScore" min="0" max="10" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="justificacionValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Objetivos -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">🎯 Objetivos (0-15%)</label>
-                        <p class="text-muted small mb-2">
-                            1. Plantea un objetivo general y específicos de manera clara y concisa.<br>
-                            2. La redacción de los objetivos respeta el nivel taxonómico (Bloom).<br>
-                            3. El objetivo general se refiere a la solución del problema.<br>
-                            4. Los objetivos específicos detallan los procesos necesarios.
-                        </p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="objetivosScore" min="0" max="15" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="objetivosValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Introducción -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">📖 Introducción (0-10%)</label>
-                        <p class="text-muted small mb-2">
-                            1. Sustenta el desarrollo de la investigación a través de teorías.<br>
-                            2. La información presentada es congruente con los objetivos.<br>
-                            3. Sustenta la información con referencias bibliográficas.
-                        </p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="introduccionScore" min="0" max="10" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="introduccionValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Metodología -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">🔬 Metodología (0-10%)</label>
-                        <p class="text-muted small mb-2">
-                            1. Describe el material, herramientas, equipos utilizados y/o procedimientos.<br>
-                            2. El desarrollo es congruente con el contenido temático.
-                        </p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="metodologiaScore" min="0" max="10" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="metodologiaValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Resultados -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">📊 Resultados y análisis (0-15%)</label>
-                        <p class="text-muted small mb-2">
-                            1. Realiza el tratamiento de datos a través de métodos numéricos, gráficos o analíticos.<br>
-                            2. El análisis e interpretación de los resultados se realiza mediante una redacción clara.<br>
-                            3. Respeta el formato establecido para presentar tablas, gráficas e imágenes.
-                        </p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="resultadosScore" min="0" max="15" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="resultadosValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Conclusiones -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">💡 Conclusiones (0-15%)</label>
-                        <p class="text-muted small mb-2">Analiza y reflexiona sobre los resultados obtenidos y los relaciona con el cumplimiento de los objetivos.</p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="conclusionesScore" min="0" max="15" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="conclusionesValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Referencias -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">📚 Referencias (0-5%)</label>
-                        <p class="text-muted small mb-2">
-                            1. Utiliza bibliografía actual como: libros, documentos de ingeniería, manuales, revistas científicas.<br>
-                            2. Respeta el formato APA 7.
-                        </p>
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <input type="range" class="form-range" id="referenciasScore" min="0" max="5" step="0.5" value="0">
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-primary fs-6" id="referenciasValue">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <h5 class="mb-3">PARTE 2: CRITERIOS COMPLEMENTARIOS (10%)</h5>
-                    
-                    <!-- Factibilidad -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">🏭 Factibilidad y pertinencia (0-2%)</label>
-                        <p class="text-muted small mb-2">Integra los conceptos para el diseño, operación y evaluación de procesos químicos, biológicos o físicos.</p>
-                        <select class="form-select" id="factibilidadScore">
-                            <option value="0">0% - No cumple</option>
-                            <option value="1">1% - Parcialmente</option>
-                            <option value="2">2% - Totalmente</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Innovación -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">💡 Innovación (0-2%)</label>
-                        <p class="text-muted small mb-2">Identifica y resuelve problemas que involucran procesos de transformación física, química y biológica.</p>
-                        <select class="form-select" id="innovacionScore">
-                            <option value="0">0% - No innovador</option>
-                            <option value="1">1% - Algo innovador</option>
-                            <option value="2">2% - Muy innovador</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Integración -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">🔗 Integración de conocimientos (0-2%)</label>
-                        <p class="text-muted small mb-2">Integra conocimientos adquiridos de otras asignaturas de la ciencia y/o la ingeniería.</p>
-                        <select class="form-select" id="integracionScore">
-                            <option value="0">0% - No integra</option>
-                            <option value="1">1% - Integra parcialmente</option>
-                            <option value="2">2% - Integra totalmente</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Cumplimiento -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">📋 Cumplimiento del Programa (0-2%)</label>
-                        <p class="text-muted small mb-2">Se apega y cumple con los objetivos del semestre.</p>
-                        <select class="form-select" id="cumplimientoScore">
-                            <option value="0">0% - No cumple</option>
-                            <option value="1">1% - Parcialmente</option>
-                            <option value="2">2% - Totalmente</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Ética -->
-                    <div class="criteria-item">
-                        <label class="form-label fw-semibold">🌱 Ética y valores (0-2%)</label>
-                        <p class="text-muted small mb-2">Impacta en las necesidades sociales, ambientales y económicas bajo marcos normativos.</p>
-                        <select class="form-select" id="eticaScore">
-                            <option value="0">0% - No considera</option>
-                            <option value="1">1% - Considera parcialmente</option>
-                            <option value="2">2% - Considera totalmente</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Resumen de puntuación -->
-                    <div class="card mt-4">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0">📊 Resumen de Puntuación</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <span>Parte 1:</span>
-                                <span id="parte1Total">0%</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span>Parte 2:</span>
-                                <span id="parte2Total">0%</span>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between fw-bold fs-5">
-                                <span>Total:</span>
-                                <span id="totalScore">0%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Modalidad sugerida -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">🎭 Modalidad sugerida por el evaluador</label>
-                    <select class="form-select" id="modalidadSugerida" required>
-                        <option value="">Seleccionar modalidad...</option>
-                        <option value="ponencia">Ponencia</option>
-                        <option value="poster">Póster</option>
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Comentarios -->
-            <div class="mt-4">
-                <label for="comentarios" class="form-label fw-semibold">💬 Comentarios del proyecto evaluado</label>
-                <textarea class="form-control" id="comentarios" rows="4" 
-                          placeholder="Proporciona comentarios detallados, sugerencias de mejora y retroalimentación para el estudiante..."></textarea>
-            </div>
-            
-            <!-- Botones -->
-            <div class="d-flex justify-content-end gap-2 mt-4">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    Cancelar
-                </button>
-                <button type="submit" class="btn btn-success">
-                    📤 Enviar Evaluación
-                </button>
-            </div>
-        </form>
-    `;
-    
-    document.getElementById('evaluationContent').innerHTML = modalContent;
-    
-    // Configurar eventos para los sliders
-    setupScoreSliders();
-    
-    // Configurar envío del formulario
-    document.getElementById('evaluationForm').addEventListener('submit', handleEvaluationSubmit);
-    
-    evaluationModal.show();
-}
-
-// Configurar sliders de puntuación
-function setupScoreSliders() {
-    // Configurar todos los sliders de la Parte 1
-    const sliders = [
-        'resumenScore', 'justificacionScore', 'objetivosScore', 'introduccionScore',
-        'metodologiaScore', 'resultadosScore', 'conclusionesScore', 'referenciasScore'
-    ];
-    
-    sliders.forEach(sliderId => {
-        const slider = document.getElementById(sliderId);
-        const valueDisplay = document.getElementById(sliderId.replace('Score', 'Value'));
-        
-        slider.addEventListener('input', function() {
-            valueDisplay.textContent = `${this.value}%`;
-            updateTotalScore();
-        });
-    });
-    
-    // Configurar selects de la Parte 2
-    const selects = [
-        'factibilidadScore', 'innovacionScore', 'integracionScore', 
-        'cumplimientoScore', 'eticaScore'
-    ];
-    
-    selects.forEach(selectId => {
-        const select = document.getElementById(selectId);
-        select.addEventListener('change', updateTotalScore);
-    });
-}
-
-// Actualizar puntuación total
-function updateTotalScore() {
-    // Calcular Parte 1
-    const parte1Sliders = [
-        'resumenScore', 'justificacionScore', 'objetivosScore', 'introduccionScore',
-        'metodologiaScore', 'resultadosScore', 'conclusionesScore', 'referenciasScore'
-    ];
-    
-    let parte1Total = 0;
-    parte1Sliders.forEach(sliderId => {
-        parte1Total += parseFloat(document.getElementById(sliderId).value) || 0;
-    });
-    
-    // Calcular Parte 2
-    const parte2Selects = [
-        'factibilidadScore', 'innovacionScore', 'integracionScore', 
-        'cumplimientoScore', 'eticaScore'
-    ];
-    
-    let parte2Total = 0;
-    parte2Selects.forEach(selectId => {
-        parte2Total += parseFloat(document.getElementById(selectId).value) || 0;
-    });
-    
-    // Calcular total
-    const totalScore = parte1Total + parte2Total;
-    
-    // Actualizar displays
-    document.getElementById('parte1Total').textContent = `${parte1Total.toFixed(1)}%`;
-    document.getElementById('parte2Total').textContent = `${parte2Total.toFixed(1)}%`;
-    document.getElementById('totalScore').textContent = `${totalScore.toFixed(1)}%`;
-    
-    return totalScore;
-}
-
-// Manejar envío de evaluación ACTUALIZADO
-async function handleEvaluationSubmit(e) {
-    e.preventDefault();
-    
-    try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Usuario no autenticado');
-        
-        // Validar modalidad sugerida
-        const modalidadSugerida = document.getElementById('modalidadSugerida').value;
-        if (!modalidadSugerida) {
-            alert('Por favor selecciona una modalidad sugerida');
-            return;
-        }
-        
-        // Recopilar todos los scores
-        const evaluationData = {
-            work_id: currentEvaluationWork.id,
-            evaluator_id: user.id,
-            
-            // Parte 1
-            resumen_score: parseFloat(document.getElementById('resumenScore').value) || 0,
-            justificacion_score: parseFloat(document.getElementById('justificacionScore').value) || 0,
-            objetivos_score: parseFloat(document.getElementById('objetivosScore').value) || 0,
-            introduccion_score: parseFloat(document.getElementById('introduccionScore').value) || 0,
-            metodologia_score: parseFloat(document.getElementById('metodologiaScore').value) || 0,
-            resultados_score: parseFloat(document.getElementById('resultadosScore').value) || 0,
-            conclusiones_score: parseFloat(document.getElementById('conclusionesScore').value) || 0,
-            referencias_score: parseFloat(document.getElementById('referenciasScore').value) || 0,
-            
-            // Parte 2
-            factibilidad_score: parseFloat(document.getElementById('factibilidadScore').value) || 0,
-            innovacion_score: parseFloat(document.getElementById('innovacionScore').value) || 0,
-            integracion_score: parseFloat(document.getElementById('integracionScore').value) || 0,
-            cumplimiento_score: parseFloat(document.getElementById('cumplimientoScore').value) || 0,
-            etica_score: parseFloat(document.getElementById('eticaScore').value) || 0,
-            
-            // Totales y comentarios
-            total_score: updateTotalScore(),
-            modalidad_sugerida: modalidadSugerida,
-            comentarios: document.getElementById('comentarios').value,
-            evaluated_at: new Date().toISOString()
-        };
-        
-        console.log('📊 Enviando evaluación completa:', evaluationData);
-        
-        // Validar que se hayan calificado todos los criterios principales
-        const parte1Total = evaluationData.resumen_score + evaluationData.justificacion_score + 
-                           evaluationData.objetivos_score + evaluationData.introduccion_score +
-                           evaluationData.metodologia_score + evaluationData.resultados_score +
-                           evaluationData.conclusiones_score + evaluationData.referencias_score;
-        
-        if (parte1Total === 0) {
-            alert('Por favor califica al menos algunos criterios de la Parte 1 antes de enviar');
-            return;
-        }
-        
-        // Guardar evaluación en Supabase
-        const result = await createEvaluation(evaluationData);
-        
-        if (result.success) {
-            // Actualizar estado del trabajo basado en la modalidad sugerida
-            let newStatus = 'under_review';
-            if (modalidadSugerida === 'ponencia') newStatus = 'accepted_oral';
-            if (modalidadSugerida === 'poster') newStatus = 'accepted_poster';
-            
-            await updateWorkStatus(currentEvaluationWork.id, newStatus);
-            
-            alert(`✅ Evaluación enviada correctamente\nPuntuación total: ${evaluationData.total_score.toFixed(1)}%`);
-            evaluationModal.hide();
-            await loadEvaluatorWorks(); // Recargar la lista
-            
-        } else {
-            throw new Error(result.error);
-        }
-        
-    } catch (error) {
-        console.error('Error enviando evaluación:', error);
-        alert('❌ Error: ' + error.message);
-    }
-}
-       
-        // Actualizar estado del trabajo
-        async function updateWorkStatus(workId, newStatus) {
-            const { error } = await supabase
-                .from('works')
-                .update({ status: newStatus })
-                .eq('id', workId);
-            
-            if (error) throw error;
+        function escapeHtml(text) {
+            return text ? text.replace(/"/g, "&quot;") : '';
         }
 
-        // Ver detalles del trabajo
-        function viewWorkDetails(workId) {
-            const work = allWorks.find(w => w.id === workId);
-            if (work) {
-                alert(`Detalles del trabajo:\n\nTítulo: ${work.title}\nEstudiante: ${work.user_profiles?.name || 'N/A'}\nModalidad: ${work.modality}\nEstado: ${work.status}\nFecha: ${new Date(work.submitted_at).toLocaleDateString()}`);
-            }
-        }
-
-        // Aplicar filtros
-        function applyFilters() {
-            const statusFilter = document.getElementById('filterStatus').value;
-            const modalityFilter = document.getElementById('filterModality').value;
-            const dateFilter = document.getElementById('filterDate').value;
-            const searchText = document.getElementById('searchTitle').value.toLowerCase();
-            
-            let filteredWorks = allWorks;
-            
-            // Filtro por estado
-            if (statusFilter !== 'all') {
-                filteredWorks = filteredWorks.filter(work => work.status === statusFilter);
-            }
-            
-            // Filtro por modalidad
-            if (modalityFilter !== 'all') {
-                filteredWorks = filteredWorks.filter(work => work.modality === modalityFilter);
-            }
-            
-            // Filtro por fecha
-            if (dateFilter !== 'all') {
-                const now = new Date();
-                filteredWorks = filteredWorks.filter(work => {
-                    const workDate = new Date(work.submitted_at);
-                    switch (dateFilter) {
-                        case 'today':
-                            return workDate.toDateString() === now.toDateString();
-                        case 'week':
-                            const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-                            return workDate >= weekAgo;
-                        case 'month':
-                            const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                            return workDate >= monthAgo;
-                        default:
-                            return true;
-                    }
-                });
-            }
-            
-            // Filtro por búsqueda de texto
-            if (searchText) {
-                filteredWorks = filteredWorks.filter(work => 
-                    work.title.toLowerCase().includes(searchText)
-                );
-            }
-            
-            displayWorks(filteredWorks);
-            updateStatistics(filteredWorks);
-        }
-
-        // Resetear filtros
-        function resetFilters() {
-            document.getElementById('filterStatus').value = 'all';
-            document.getElementById('filterModality').value = 'all';
-            document.getElementById('filterDate').value = 'all';
-            document.getElementById('searchTitle').value = '';
-            displayWorks(allWorks);
-            updateStatistics(allWorks);
-        }
-
-        // Refrescar lista
-        function refreshWorks() {
-            loadEvaluatorWorks();
-        }
-
-        // Mostrar error
-        function showError(message) {
-            const worksContainer = document.getElementById('worksList');
-            if (worksContainer) {
-                worksContainer.innerHTML = `
-                    <div class="alert alert-danger">
-                        <strong>Error:</strong> ${message}
-                        <br><small>Verifica la consola para más detalles</small>
-                    </div>
-                `;
-            }
+        async function logout() {
+            await window.apiClient.logoutUser();
+            window.location.href = 'index.html';
         }
     </script>
 </body>
