@@ -32,6 +32,24 @@
                         <label for="title" class="form-label fw-bold">Título del Trabajo *</label>
                         <input type="text" class="form-control form-control-lg" id="title" required placeholder="Ej: Investigación sobre...">
                     </div>
+
+                    <!-- SEMESTRE (LISTA FIJA) -->
+                    <div class="mb-4">
+                        <label for="semester" class="form-label fw-bold">Semestre Actual *</label>
+                        <select class="form-select form-select-lg" id="semester" required>
+                            <option value="">Selecciona tu semestre...</option>
+                            <option value="1er Semestre">1er Semestre</option>
+                            <option value="2do Semestre">2do Semestre</option>
+                            <option value="3er Semestre">3er Semestre</option>
+                            <option value="4to Semestre">4to Semestre</option>
+                            <option value="5to Semestre">5to Semestre</option>
+                            <option value="6to Semestre">6to Semestre</option>
+                            <option value="7mo Semestre">7mo Semestre</option>
+                            <option value="8vo Semestre">8vo Semestre</option>
+                            <option value="9no Semestre">9no Semestre</option>
+                        </select>
+                        <div class="form-text">Selecciona el semestre que estás cursando actualmente.</div>
+                    </div>
                     
                     <!-- Resumen -->
                     <div class="mb-4">
@@ -105,7 +123,8 @@
                 student_id: user.id,
                 title: document.getElementById('title').value,
                 abstract: document.getElementById('abstract').value,
-                modality: "Pendiente" // Se envía fijo automáticamente
+                semester: document.getElementById('semester').value, // Guarda el texto exacto (ej: "1er Semestre")
+                modality: "Pendiente" 
             };
 
             const result = await window.apiClient.submitWork(workData, input.files[0]);

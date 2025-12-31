@@ -35,7 +35,7 @@ const apiClient = {
     },
 
     // Trabajos
-    async submitWork(workData, file) {
+     async submitWork(workData, file) {
         try {
             const base64 = await toBase64(file);
             return await postData({
@@ -43,6 +43,7 @@ const apiClient = {
                 student_id: workData.student_id,
                 title: workData.title,
                 abstract: workData.abstract,
+                semester: workData.semester, // <--- AÑADIDO
                 modality: workData.modality,
                 fileName: file.name,
                 fileBase64: base64.split(',')[1]
