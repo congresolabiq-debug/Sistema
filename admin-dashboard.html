@@ -382,37 +382,44 @@
             `).join('');
         }
 
-        // --- NUEVA FUNCIÓN: DICTAMINAR TODOS ---
+       // --- FUNCIÓN ACTUALIZADA: DICTAMEN MASIVO INTELIGENTE ---
         async function finalizeAllReadyWorks() {
-            if (readyWorksCache.length === 0) return alert('No hay trabajos listos para procesar.');
+            // Verificar si hay trabajos listos (readyWorksCache se calcula en calculateReadyWorks)
+            if (readyWorksCache.length === 0) return alert('No hay trabajos listos (con 3 evaluaciones) para procesar.');
 
-            if (!confirm(`⚠️ ATENCIÓN ⚠️\n\nEstás a punto de dictaminar y enviar correos a ${readyWorksCache.length} alumnos.\n\n¿Deseas continuar?`)) return;
+            const mensaje = `⚠️ DICTAMEN FINAL CON REGLA DE CUPO ⚠️\n\n` +
+                            `Vas a procesar ${readyWorksCache.length} trabajos.\n` +
+                            `- Se calcularán los promedios.\n` +
+                            `- Se seleccionarán los TOP 2 mejores promedios de CADA SEMESTRE para Ponencia.\n` +
+                            `- El resto de ponencias se moverán a Póster.\n` +
+                            `- Se enviarán los correos automáticamente.\n\n` +
+                            `¿Estás seguro de continuar?`;
+
+            if (!confirm(mensaje)) return;
 
             progressModal.show();
-            let successCount = 0;
-            const total = readyWorksCache.length;
-
-            for (let i = 0; i < total; i++) {
-                const work = readyWorksCache[i];
-                document.getElementById('progressMessage').textContent = `Procesando (${i + 1}/${total}): ${work.title.substring(0, 30)}...`;
+            document.getElementById('progressMessage').textContent = "Calculando rankings y enviando correos... Esto puede tardar unos segundos.";
+            
+            try {
+                // Llamada única al backend que hace todo el proceso
+                const result = await window.apiClient.batchFinalize();
                 
-                try {
-                    // Llamada al backend
-                    const result = await window.apiClient.finalizeAndNotify(work.id);
-                    if (result.success) successCount++;
-                    
-                    // Pequeña pausa para no saturar Google (Rate limits)
-                    await new Promise(r => setTimeout(r, 800)); 
-
-                } catch (e) {
-                    console.error(`Error procesando ${work.id}:`, e);
+                progressModal.hide();
+                
+                if (result.success) {
+                    alert(`✅ Proceso finalizado exitosamente.\n\nSe han dictaminado ${result.count} trabajos aplicando las reglas de semestre.`);
+                    loadAdminDashboard(); // Recargar datos
+                } else {
+                    throw new Error(result.error || 'Error desconocido');
                 }
-            }
 
-            progressModal.hide();
-            alert(`✅ Proceso finalizado.\n\nSe dictaminaron ${successCount} de ${total} trabajos exitosamente.`);
-            loadAdminDashboard();
+            } catch (e) {
+                progressModal.hide();
+                console.error(e);
+                alert('❌ Ocurrió un error: ' + e.message);
+            }
         }
+
 
         // --- CONTADORES DEL SIDEBAR (NUEVO) ---
         function updateStatistics() {
