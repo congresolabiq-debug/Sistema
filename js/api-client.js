@@ -106,6 +106,12 @@ const apiClient = {
             work_id: workId
         });
     },
+
+    async batchFinalize() {
+        return await postData({
+            action: 'batchFinalize'
+        });
+    },
 };
 
 // --- HELPERS ---
