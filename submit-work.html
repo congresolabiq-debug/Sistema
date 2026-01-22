@@ -1,21 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enviar Trabajo - Portal Congreso</title>
+    <title>Envio de Trabajos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png"
+        href="https://raw.githubusercontent.com/congresolabiq-debug/Sistema/refs/heads/main/favicon.ico">
     <link href="css/style.css" rel="stylesheet">
     <style>
-        .file-upload-area { border: 2px dashed #dee2e6; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; background: #fafafa; transition: all 0.3s; }
-        .file-upload-area:hover { border-color: #007bff; background: #f0f8ff; }
-        .submit-card { max-width: 800px; margin: 2rem auto; border-radius: 15px; border:none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .file-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            background: #fafafa;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+
+        .submit-card {
+            max-width: 800px;
+            margin: 2rem auto;
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html">🎓 Congreso Estudiantil de Laboratorios de Ingeniería Química</a>
+            <a class="navbar-brand fw-bold" href="index.html">🎓 Congreso Estudiantil de Laboratorios de Ingeniería
+                Química</a>
             <a class="nav-link text-white" href="student-dashboard.html">← Volver</a>
         </div>
     </nav>
@@ -30,7 +54,8 @@
                     <!-- Título -->
                     <div class="mb-4">
                         <label for="title" class="form-label fw-bold">Título del Trabajo *</label>
-                        <input type="text" class="form-control form-control-lg" id="title" required placeholder="Ej: Investigación sobre...">
+                        <input type="text" class="form-control form-control-lg" id="title" required
+                            placeholder="Ej: Investigación sobre...">
                     </div>
 
                     <!-- SEMESTRE (LISTA FIJA) -->
@@ -50,14 +75,15 @@
                         </select>
                         <div class="form-text">Selecciona el semestre que estás cursando actualmente.</div>
                     </div>
-                    
+
                     <!-- Resumen -->
                     <div class="mb-4">
                         <label for="abstract" class="form-label fw-bold">Palabras clave / Keywords *</label>
-                        <textarea class="form-control" id="abstract" rows="4" placeholder="Máximo 5 palabras clave..." required></textarea>
+                        <textarea class="form-control" id="abstract" rows="4" placeholder="Máximo 5 palabras clave..."
+                            required></textarea>
                         <div class="form-text">Describe brevemente el tema o palabras clave.</div>
                     </div>
-                   
+
                     <!-- Subida de Archivo -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Subir Archivo PDF *</label>
@@ -68,11 +94,12 @@
                             <input type="file" class="d-none" id="fileInput" accept=".pdf" required>
                         </div>
                     </div>
-                    
+
                     <div class="alert alert-info small">
-                        ℹ️ La modalidad (Ponencia o Cartel) será asignada por el comité evaluador tras la revisión de tu documento.
+                        ℹ️ La modalidad (Ponencia o Cartel) será asignada por el comité evaluador tras la revisión de tu
+                        documento.
                     </div>
-                    
+
                     <div class="d-grid">
                         <button type="submit" class="btn btn-success btn-lg" id="submitButton">
                             📤 Enviar Trabajo
@@ -83,63 +110,64 @@
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/api-client.js"></script>
-<script>
-    // Lógica para Drag & Drop visual y selección de archivo
-    const area = document.getElementById('fileUploadArea');
-    const input = document.getElementById('fileInput');
-    
-    area.addEventListener('click', () => input.click());
-    
-    input.addEventListener('change', (e) => {
-        if(e.target.files[0]) {
-            const file = e.target.files[0];
-            if(file.type !== 'application/pdf') {
-                alert('❌ Solo se permiten archivos PDF');
-                input.value = '';
-                return;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api-client.js"></script>
+    <script>
+        // Lógica para Drag & Drop visual y selección de archivo
+        const area = document.getElementById('fileUploadArea');
+        const input = document.getElementById('fileInput');
+
+        area.addEventListener('click', () => input.click());
+
+        input.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                const file = e.target.files[0];
+                if (file.type !== 'application/pdf') {
+                    alert('❌ Solo se permiten archivos PDF');
+                    input.value = '';
+                    return;
+                }
+                document.getElementById('fileName').textContent = "✅ " + file.name;
+                area.style.borderColor = "#198754";
+                area.style.backgroundColor = "#f0fff4";
             }
-            document.getElementById('fileName').textContent = "✅ " + file.name;
-            area.style.borderColor = "#198754";
-            area.style.backgroundColor = "#f0fff4";
-        }
-    });
+        });
 
-    // Lógica de Envío
-    document.getElementById('submitWorkForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        if(input.files.length === 0) return alert('⚠️ Por favor selecciona un archivo PDF');
-        
-        const btn = document.getElementById('submitButton');
-        const originalText = btn.innerHTML;
-        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+        // Lógica de Envío
+        document.getElementById('submitWorkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        try {
-            const user = (await window.apiClient.checkAuth()).user;
-            
-            const workData = {
-                student_id: user.id,
-                title: document.getElementById('title').value,
-                abstract: document.getElementById('abstract').value,
-                semester: document.getElementById('semester').value, // Guarda el texto exacto (ej: "1er Semestre")
-                modality: "Pendiente" 
-            };
+            if (input.files.length === 0) return alert('⚠️ Por favor selecciona un archivo PDF');
 
-            const result = await window.apiClient.submitWork(workData, input.files[0]);
+            const btn = document.getElementById('submitButton');
+            const originalText = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
 
-            if (result.success) {
-                alert('✅ Trabajo enviado correctamente.');
-                window.location.href = 'student-dashboard.html';
-            } else {
-                throw new Error(result.error);
+            try {
+                const user = (await window.apiClient.checkAuth()).user;
+
+                const workData = {
+                    student_id: user.id,
+                    title: document.getElementById('title').value,
+                    abstract: document.getElementById('abstract').value,
+                    semester: document.getElementById('semester').value, // Guarda el texto exacto (ej: "1er Semestre")
+                    modality: "Pendiente"
+                };
+
+                const result = await window.apiClient.submitWork(workData, input.files[0]);
+
+                if (result.success) {
+                    alert('✅ Trabajo enviado correctamente.');
+                    window.location.href = 'student-dashboard.html';
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+                btn.disabled = false; btn.innerHTML = originalText;
             }
-        } catch (err) {
-            alert('Error: ' + err.message);
-            btn.disabled = false; btn.innerHTML = originalText;
-        }
-    });
-</script>
+        });
+    </script>
 </body>
+
 </html>
