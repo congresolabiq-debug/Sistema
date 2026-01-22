@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,25 +8,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 </head>
+
 <body class="admin-container">
-    
+
     <!-- Navbar con botón Hamburguesa para Móvil -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">🎓 Panel Admin</a>
-            
+
             <!-- Botón toggle para móvil -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <span class="nav-link active">👤 Administrador</span>
                     </li>
                     <li class="nav-item">
-                        <!-- Botón Cerrar Sesión corregido -->
+                        <!-- Botón Cerrar Sesión -->
                         <button class="btn btn-link nav-link fw-bold" onclick="handleLogout()">
                             🚪 Cerrar Sesión
                         </button>
@@ -45,8 +47,15 @@
                     </div>
                     <div class="card-body p-2">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-outline-success fw-bold text-start p-3" onclick="showSection('ready')">
-                                ✅ Por Dictaminar <span id="readyBadge" class="badge bg-danger rounded-pill d-none">0</span>
+                            <!-- BOTÓN MOVIDO AL LUGAR CORRECTO -->
+                            <button class="btn btn-outline-dark fw-bold text-start p-3" onclick="showSection('event')">
+                                🏆 Fase 2: Premiación
+                            </button>
+
+                            <button class="btn btn-outline-success fw-bold text-start p-3"
+                                onclick="showSection('ready')">
+                                ✅ Por Dictaminar <span id="readyBadge"
+                                    class="badge bg-danger rounded-pill d-none">0</span>
                             </button>
                             <button class="btn btn-outline-primary text-start p-3" onclick="showSection('assignments')">
                                 📋 Asignaciones
@@ -61,7 +70,7 @@
                 <!-- Resultados -->
                 <div class="card stats-card mt-3">
                     <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">📈 Resultados</h5>
+                        <h5 class="mb-0">📈 Resultados Fase 1</h5>
                     </div>
                     <div class="card-body">
                         <p class="mb-1">🎤 Ponencia: <strong id="countOral">0</strong></p>
@@ -70,42 +79,105 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Contenido Principal -->
             <div class="col-lg-9">
-                
+
                 <!-- Sección Asignaciones -->
                 <div id="assignmentsSection">
                     <h3 class="mb-3">Panel General</h3>
                     <!-- Estadísticas Rápidas -->
                     <div class="row mb-4 g-2">
-                        <div class="col-6 col-md-3"><div class="card bg-primary text-white p-3 text-center h-100"><h3 id="totalWorks" class="mb-0">0</h3><small>Total</small></div></div>
-                        <div class="col-6 col-md-3"><div class="card bg-warning text-dark p-3 text-center h-100"><h3 id="pendingWorks" class="mb-0">0</h3><small>Pendientes</small></div></div>
-                        <div class="col-6 col-md-3"><div class="card bg-info text-dark p-3 text-center h-100"><h3 id="assignedWorks" class="mb-0">0</h3><small>En Revisión</small></div></div>
-                        <div class="col-6 col-md-3"><div class="card bg-success text-white p-3 text-center h-100"><h3 id="completedWorks" class="mb-0">0</h3><small>Listos</small></div></div>
+                        <div class="col-6 col-md-3">
+                            <div class="card bg-primary text-white p-3 text-center h-100">
+                                <h3 id="totalWorks" class="mb-0">0</h3><small>Total</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card bg-warning text-dark p-3 text-center h-100">
+                                <h3 id="pendingWorks" class="mb-0">0</h3><small>Pendientes</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card bg-info text-dark p-3 text-center h-100">
+                                <h3 id="assignedWorks" class="mb-0">0</h3><small>En Revisión</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card bg-success text-white p-3 text-center h-100">
+                                <h3 id="completedWorks" class="mb-0">0</h3><small>Listos</small>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <button class="btn btn-primary mb-3 w-100" onclick="loadAdminDashboard()">🔄 Actualizar Tabla</button>
+
+                    <button class="btn btn-primary mb-3 w-100" onclick="loadAdminDashboard()">🔄 Actualizar
+                        Tabla</button>
                     <div id="assignmentsList"></div>
                 </div>
 
                 <!-- Sección Dictamen -->
                 <div id="readySection" class="d-none">
-                    <h3 class="text-success mb-3">✅ Dictamen Final</h3>
-                    <div class="alert alert-info">Revisa que los trabajos tengan 3 evaluaciones antes de dictaminar.</div>
+                    <h3 class="text-success mb-3">✅ Dictamen Final (Fase 1)</h3>
+                    <div class="alert alert-info">Revisa que los trabajos tengan 3 evaluaciones antes de dictaminar.
+                    </div>
                     <button class="btn btn-success fw-bold w-100 mb-4 py-3 shadow" onclick="finalizeAllReadyWorks()">
                         🚀 DICTAMINAR Y NOTIFICAR TODOS
                     </button>
                     <div id="readyWorksList"></div>
                 </div>
-                
+
                 <!-- Sección Pendientes -->
                 <div id="worksSection" class="d-none">
                     <h3>Trabajos por Asignar</h3>
-                    <button class="btn btn-warning w-100 mb-3" onclick="assignAllPendingWorks()">🎯 Asignar Todos Automáticamente</button>
+                    <button class="btn btn-warning w-100 mb-3" onclick="assignAllPendingWorks()">🎯 Asignar Todos
+                        Automáticamente</button>
                     <div id="pendingWorksList"></div>
                 </div>
-                
+
+                <!-- SECCIÓN FASE 2: EVENTO Y PREMIACIÓN -->
+                <div id="eventSection" class="d-none">
+                    <h2 class="mb-4" style="color: #6f42c1;">🎤 Fase 2: Evento Presencial</h2>
+
+                    <div class="card mb-4 border-primary">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>Asignación de Jueces Presenciales</h5>
+                                <p class="mb-0 text-muted">Asigna 3 jueces aleatorios a todos los trabajos aceptados
+                                    (Ponencia/Cartel).</p>
+                            </div>
+                            <button class="btn btn-primary btn-lg" onclick="assignLiveJudges()">
+                                🎲 Asignar Jueces Fase 2
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="mb-3">🏆 Tabla de Ganadores (En Tiempo Real)</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-primary text-white text-center">🥇 TOP 3 PONENCIA (ORAL)
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush" id="winnersOral">
+                                        <li class="list-group-item text-center text-muted">Cargando...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white text-center">🥇 TOP 3 CARTEL (PÓSTER)
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush" id="winnersPoster">
+                                        <li class="list-group-item text-center text-muted">Cargando...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -132,20 +204,19 @@
         let allWorks = [], pendingWorks = [], readyWorksCache = [], allAssignmentsCache = [];
         let assignmentSystem = new EvaluationAssignment();
         let progressModal = null;
-        
+
         document.addEventListener('DOMContentLoaded', () => {
             progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
             checkAdminAuth();
         });
 
-        // FUNCIÓN DE LOGOUT CORREGIDA
         async function handleLogout() {
-            if(confirm('¿Cerrar sesión?')) {
+            if (confirm('¿Cerrar sesión?')) {
                 await window.apiClient.logoutUser();
                 window.location.href = 'index.html';
             }
         }
-        
+
         async function checkAdminAuth() {
             const session = await window.apiClient.checkAuth();
             if (!session) return window.location.href = 'login.html';
@@ -153,7 +224,7 @@
             if (profile?.user_type !== 'admin') return window.location.href = 'student-dashboard.html';
             loadAdminDashboard();
         }
-        
+
         async function loadAdminDashboard() {
             try {
                 const [works, assignments, evaluators] = await Promise.all([
@@ -179,7 +250,7 @@
             assList.innerHTML = allAssignmentsCache.slice(0, 10).map(a => `
                 <div class="card mb-2 shadow-sm"><div class="card-body py-2 row align-items-center">
                     <div class="col-8"><strong>${a.works?.title}</strong><br><small>${a.user_profiles?.name}</small></div>
-                    <div class="col-4 text-end"><span class="badge bg-${a.status==='completed'?'success':'warning'}">${a.status}</span></div>
+                    <div class="col-4 text-end"><span class="badge bg-${a.status === 'completed' ? 'success' : 'warning'}">${a.status}</span></div>
                 </div></div>`).join('') || '<p class="text-center text-muted">Sin datos</p>';
 
             // Pendientes
@@ -212,23 +283,23 @@
         }
 
         async function finalizeAllReadyWorks() {
-            if(!readyWorksCache.length) return alert('No hay trabajos listos.');
-            if(!confirm(`¿Dictaminar ${readyWorksCache.length} trabajos? (Regla Top 2 Semestre)`)) return;
+            if (!readyWorksCache.length) return alert('No hay trabajos listos.');
+            if (!confirm(`¿Dictaminar ${readyWorksCache.length} trabajos? (Regla Top 2 Semestre)`)) return;
 
             progressModal.show();
             try {
                 const res = await window.apiClient.batchFinalize();
                 progressModal.hide();
-                if(res.success) { alert(`✅ Finalizado. ${res.count} trabajos procesados.`); loadAdminDashboard(); }
-            } catch(e) { progressModal.hide(); alert('Error: ' + e.message); }
+                if (res.success) { alert(`✅ Finalizado. ${res.count} trabajos procesados.`); loadAdminDashboard(); }
+            } catch (e) { progressModal.hide(); alert('Error: ' + e.message); }
         }
 
         async function assignAllPendingWorks() {
-            if(!pendingWorks.length) return alert('Nada pendiente');
+            if (!pendingWorks.length) return alert('Nada pendiente');
             progressModal.show();
             let count = 0;
-            for(const w of pendingWorks) {
-                if((await assignmentSystem.assignWorksToEvaluators(w.id, 3)).success) count++;
+            for (const w of pendingWorks) {
+                if ((await assignmentSystem.assignWorksToEvaluators(w.id, 3)).success) count++;
             }
             progressModal.hide();
             alert(`Asignados ${count}`);
@@ -236,27 +307,70 @@
         }
 
         async function assignOne(id) {
-            if(confirm('¿Asignar?')) {
+            if (confirm('¿Asignar?')) {
                 await assignmentSystem.assignWorksToEvaluators(id, 3);
                 loadAdminDashboard();
             }
+        }
+
+        // --- FUNCIONES FASE 2 ---
+        async function assignLiveJudges() {
+            if (!confirm('¿Asignar jueces a todos los trabajos aceptados para la evaluación presencial?')) return;
+            const res = await window.apiClient.assignLiveWorks();
+            if (res.success) alert(`✅ Se generaron ${res.count} asignaciones para el evento.`);
+            else alert('Error: ' + res.error);
+        }
+
+        async function loadWinners() {
+            const res = await window.apiClient.getWinners();
+            if (res) {
+                renderWinnerList('winnersOral', res.oral);
+                renderWinnerList('winnersPoster', res.poster);
+            }
+        }
+
+        function renderWinnerList(elementId, list) {
+            const el = document.getElementById(elementId);
+            if (!list || list.length === 0) { el.innerHTML = '<li class="list-group-item text-center">Sin datos aún</li>'; return; }
+
+            el.innerHTML = list.map((w, i) => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-warning text-dark me-2">#${i + 1}</span>
+                        <strong>${w.title}</strong><br>
+                        <small>${w.student_name}</small>
+                    </div>
+                    <span class="badge bg-secondary rounded-pill" style="font-size:1em;">${w.live_score || 0} pts</span>
+                </li>
+            `).join('');
         }
 
         function updateStats() {
             document.getElementById('totalWorks').textContent = allWorks.length;
             document.getElementById('pendingWorks').textContent = pendingWorks.length;
             document.getElementById('assignedWorks').textContent = allWorks.filter(w => w.status === 'under_review').length;
-            document.getElementById('completedWorks').textContent = allWorks.filter(w => ['accepted_oral','accepted_poster','rejected'].includes(w.status)).length;
-            
+            document.getElementById('completedWorks').textContent = allWorks.filter(w => ['accepted_oral', 'accepted_poster', 'rejected'].includes(w.status)).length;
+
             document.getElementById('countOral').textContent = allWorks.filter(w => w.status === 'accepted_oral').length;
             document.getElementById('countPoster').textContent = allWorks.filter(w => w.status === 'accepted_poster').length;
             document.getElementById('countRejected').textContent = allWorks.filter(w => w.status === 'rejected').length;
         }
 
         function showSection(id) {
-            ['assignments', 'works', 'ready'].forEach(s => document.getElementById(s+'Section').classList.add('d-none'));
-            document.getElementById(id+'Section').classList.remove('d-none');
+            // Ocultar todas las secciones incluyendo 'event'
+            ['assignments', 'works', 'ready', 'event'].forEach(s => {
+                const el = document.getElementById(s + 'Section');
+                if (el) el.classList.add('d-none');
+            });
+
+            // Mostrar la seleccionada
+            const target = document.getElementById(id + 'Section');
+            if (target) {
+                target.classList.remove('d-none');
+                if (id === 'event') loadWinners(); // Cargar ganadores solo si es la sección de evento
+            }
         }
     </script>
 </body>
+
 </html>

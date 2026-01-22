@@ -1,5 +1,5 @@
 // --- CONFIGURACIÓN ---
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_W5ZMzbUY-VQ0TgWqAKTGnB38EAWUfbTbXF_wICylArzTcy8KO_2FQho2FeXtGHdmdA/exec'; 
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_W5ZMzbUY-VQ0TgWqAKTGnB38EAWUfbTbXF_wICylArzTcy8KO_2FQho2FeXtGHdmdA/exec';
 
 // --- GESTIÓN DE SESIÓN LOCAL ---
 function saveSession(user) { localStorage.setItem('congreso_user', JSON.stringify(user)); }
@@ -19,8 +19,8 @@ const apiClient = {
     },
 
     async registerUser(email, password, name, userType) {
-        return await postData({ 
-            action: 'register', email, password, name, user_type: userType 
+        return await postData({
+            action: 'register', email, password, name, user_type: userType
         });
     },
 
@@ -35,7 +35,7 @@ const apiClient = {
     },
 
     // Trabajos
-     async submitWork(workData, file) {
+    async submitWork(workData, file) {
         try {
             const base64 = await toBase64(file);
             return await postData({
@@ -111,6 +111,26 @@ const apiClient = {
         return await postData({
             action: 'batchFinalize'
         });
+    },
+    async assignLiveWorks() {
+        return await postData({ action: 'assignLiveWorks' });
+    },
+
+    async getLiveAssignments() {
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getLiveAssignments`);
+        const json = await res.json();
+        return json.success ? json.data : [];
+    },
+
+    async submitLiveEvaluation(data) {
+        data.action = 'submitLiveEvaluation';
+        return await postData(data);
+    },
+
+    async getWinners() {
+        const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getWinners`);
+        const json = await res.json();
+        return json.success ? json.data : { oral: [], poster: [] };
     },
 };
 
