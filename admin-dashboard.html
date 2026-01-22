@@ -371,59 +371,78 @@
                 if (id === 'event') loadWinners(); // Cargar ganadores solo si es la sección de evento
             }
         }
+
+        // --- RENDERIZADO DE GANADORES CON BOTÓN ---
         function renderWinnerList(elementId, list) {
             const el = document.getElementById(elementId);
-            if (!list || list.length === 0) { el.innerHTML = '<li class="list-group-item text-center">Sin datos aún</li>'; return; }
+
+            if (!list || list.length === 0) {
+                el.innerHTML = '<li class="list-group-item text-center text-muted">Sin evaluaciones aún</li>';
+                return;
+            }
 
             el.innerHTML = list.map((w, i) => `
                 <li class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <span class="badge bg-warning text-dark me-2">#${i + 1}</span>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="me-2">
+                            <span class="badge bg-warning text-dark me-1">#${i + 1}</span>
                             <strong>${w.title}</strong>
                         </div>
-                        <span class="badge bg-secondary rounded-pill">${w.live_score || 0} pts</span>
+                        <span class="badge bg-secondary rounded-pill text-nowrap">${w.live_score || 0} pts</span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">${w.student_name}</small>
-                        <button class="btn btn-sm btn-outline-dark" onclick="generateCertificates('${w.id}')">
-                            📜 Enviar Constancias
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                        <small class="text-muted text-truncate" style="max-width: 50%;">
+                            🎓 ${w.student_name}
+                        </small>
+                        
+                        <button class="btn btn-sm btn-outline-primary fw-bold" onclick="generateCertificates('${w.id}')">
+                            📜 Generar Constancia
                         </button>
                     </div>
                 </li>
             `).join('');
         }
 
-        // FUNCIÓN PARA LLAMAR AL BACKEND
+        // --- ACCIÓN: GENERAR CONSTANCIAS ---
         async function generateCertificates(workId) {
-            if (!confirm('¿Generar los PDFs de las constancias?')) return;
+            // Confirmación
+            if (!confirm('¿Generar los PDFs de las constancias para este equipo?\n\nSe guardarán en tu Google Drive.')) return;
 
+            // Feedback visual en el botón
             const btn = event.target;
             const originalText = btn.innerHTML;
+            const originalClass = btn.className;
+
             btn.disabled = true;
-            btn.innerHTML = '⏳ Creando PDFs...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creando...';
+            btn.className = 'btn btn-sm btn-warning fw-bold';
 
             try {
+                // Llamada al backend
                 const res = await window.apiClient.generateCertificates(workId);
 
                 if (res.success) {
                     btn.innerHTML = '✅ PDFs Listos';
-                    btn.classList.remove('btn-outline-dark');
-                    btn.classList.add('btn-success');
+                    btn.className = 'btn btn-sm btn-success fw-bold';
 
-                    // Preguntar si quiere abrir la carpeta
-                    if (confirm(`✅ ¡Éxito! Se generaron ${res.count} constancias.\n\n¿Quieres abrir la carpeta de Google Drive ahora para verlas?`)) {
-                        window.open(res.folderUrl, '_blank');
-                    }
+                    // Preguntar si abrir la carpeta
+                    setTimeout(() => {
+                        if (confirm(`✅ ¡Éxito!\nSe generaron ${res.count} constancias.\n\n¿Quieres abrir la carpeta de Google Drive ahora?`)) {
+                            window.open(res.folderUrl, '_blank');
+                        }
+                    }, 500);
                 } else {
                     throw new Error(res.error);
                 }
             } catch (e) {
-                alert('Error: ' + e.message);
+                alert('❌ Error: ' + e.message);
                 btn.disabled = false;
                 btn.innerHTML = originalText;
+                btn.className = originalClass;
             }
         }
+
     </script>
 </body>
 
