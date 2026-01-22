@@ -43,8 +43,9 @@ const apiClient = {
                 student_id: workData.student_id,
                 title: workData.title,
                 abstract: workData.abstract,
-                semester: workData.semester, // <--- AÑADIDO
-                modality: workData.modality,
+                semester: workData.semester,
+                team_members: workData.team_members, // <--- AÑADIDO
+                modality: "Pendiente",
                 fileName: file.name,
                 fileBase64: base64.split(',')[1]
             });
@@ -131,6 +132,13 @@ const apiClient = {
         const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getWinners`);
         const json = await res.json();
         return json.success ? json.data : { oral: [], poster: [] };
+    },
+
+    async generateCertificates(workId) {
+        return await postData({
+            action: 'generateCertificates',
+            work_id: workId
+        });
     },
 };
 
