@@ -52,3 +52,25 @@ MODALIDAD SUGERIDA POR EL(LA) EVALUADOR(A)
 
 COMENTARIOS DEL PROYECTO EVALUADO
 
+
+
+
+Congreso 
+
+Tono de voz (0-5)
+Las y los ponentes modulan correcta y apropiadamente el tono de voz. La comunicación fluye con naturalidad y corrección. Utilizan el vocabulario correcto y adecuado
+
+Calidad de la presentación (0-5)
+Mantienen la atención de la audiencia. Evitan limitarse a leer lo que está escrito en las diapositivas.
+
+Dominio del contenido (0-5)
+Demuestran dominio del tema al exponer y al responder las preguntas de la audiencia.
+
+Lenguaje corporal (0-5)
+Utilizan un lenguaje corporal correcto (movimientos, gestos, vestimenta adecuada, etc.).
+
+Uso de recursos visuales (0-5)
+Se apoyan en las diapositivas para su exposición y éstas guardan una adecuada proporción de texto/imagen.
+
+Comunicación escrita (0-5)
+La redacción es clara y precisa, además, no contiene errores de ortografía.
