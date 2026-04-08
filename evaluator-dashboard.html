@@ -1,3 +1,6 @@
+Evaluator dashboard · HTML
+Copiar
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -22,7 +25,6 @@
             border-left-color: #6f42c1;
         }
 
-        /* Color morado para fase 2 */
         .work-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -38,18 +40,28 @@
             font-weight: bold;
             color: #6f42c1;
         }
+
+        .badge-evaluado {
+            background-color: #198754;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: .85rem;
+        }
     </style>
 </head>
 
 <body>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">👨‍🏫 Evaluador</a>
-            <button class="btn btn-outline-light btn-sm" onclick="logout()">Salir</button>
+            <a class="navbar-brand fw-bold" href="#">👨‍🏫 Panel Evaluador</a>
+            <button class="btn btn-outline-light btn-sm" onclick="logout()">🚪 Salir</button>
         </div>
     </nav>
 
     <div class="container">
+
         <!-- Pestañas de Fase -->
         <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
             <li class="nav-item">
@@ -69,10 +81,19 @@
 
             <!-- FASE 1 -->
             <div class="tab-pane fade show active" id="phase1">
-                <h4 class="mb-3 text-secondary">Evaluación de Escritos</h4>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-secondary mb-0">Evaluación de Escritos</h4>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadPhase1()">🔄 Actualizar</button>
+                </div>
+                <div class="alert alert-info">
+                    <strong>Instrucciones:</strong> Abre el PDF de cada trabajo, califícalo del 0 al 100 y elige la
+                    modalidad sugerida.
+                    Solo ves los trabajos que aún <strong>no has evaluado</strong>.
+                </div>
                 <div id="phase1List" class="row">
                     <div class="text-center py-5">
                         <div class="spinner-border text-primary"></div>
+                        <p class="mt-2 text-muted">Cargando tus asignaciones...</p>
                     </div>
                 </div>
             </div>
@@ -80,76 +101,136 @@
             <!-- FASE 2 -->
             <div class="tab-pane fade" id="phase2">
                 <div class="alert alert-info border-start border-4 border-info">
-                    <strong>Instrucciones:</strong> Evalúa al alumno durante su presentación en vivo. Escala 0 a 5.
+                    <strong>Instrucciones:</strong> Evalúa al alumno durante su presentación en vivo. Escala de 0 a 5
+                    por criterio.
                 </div>
                 <div id="phase2List" class="row">
                     <div class="text-center py-5">
                         <div class="spinner-border text-primary"></div>
+                        <p class="mt-2 text-muted">Cargando evaluaciones presenciales...</p>
                     </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ✅ MODAL FASE 1 RESTAURADO Y COMPLETO -->
+    <div class="modal fade" id="evalModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">📋 Evaluación Documental</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 id="evalWorkTitle" class="text-primary mb-1 fw-bold"></h6>
+                    <p id="evalWorkSemester" class="text-muted mb-2"></p>
+                    <a id="evalWorkUrl" href="#" target="_blank" class="btn btn-sm btn-outline-primary mb-3">
+                        📄 Abrir PDF del trabajo
+                    </a>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Puntuación Total <span class="text-danger">*</span> <small
+                                class="text-muted fw-normal">(0 - 100)</small></label>
+                        <input type="number" class="form-control" id="evalScore" min="0" max="100" placeholder="Ej: 85"
+                            required>
+                        <div class="form-text">Una calificación ≥ 70 se considera aprobatoria para selección.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Modalidad Sugerida <span class="text-danger">*</span></label>
+                        <select class="form-select" id="evalModality" required>
+                            <option value="">-- Selecciona una modalidad --</option>
+                            <option value="ponencia">🎤 Ponencia (Oral)</option>
+                            <option value="poster">📊 Cartel (Póster)</option>
+                        </select>
+                        <div class="form-text">El comité tomará en cuenta la sugerencia de los 3 evaluadores.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Retroalimentación para el alumno</label>
+                        <textarea class="form-control" id="evalComments" rows="4"
+                            placeholder="Describe los puntos fuertes del trabajo, áreas de mejora, observaciones metodológicas, etc."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success fw-bold" onclick="submitEval()">
+                        ✅ Enviar Evaluación
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL FASE 1 (Tu modal anterior, simplificado aquí para no repetir código largo, úsalo si ya lo tienes) -->
-    <!-- ... (Pega aquí tu modal anterior de evaluación documental) ... -->
-
-    <!-- MODAL FASE 2 (NUEVO) -->
+    <!-- MODAL FASE 2 -->
     <div class="modal fade" id="liveModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-purple text-white" style="background: #6f42c1;">
+                <div class="modal-header text-white" style="background: #6f42c1;">
                     <h5 class="modal-title">🎤 Evaluación Presencial</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <h5 id="liveWorkTitle" class="text-primary mb-3"></h5>
+                    <h5 id="liveWorkTitle" class="mb-3" style="color:#6f42c1;"></h5>
                     <form id="liveForm">
-                        <!-- Rúbrica 0-5 -->
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">1. Tono de voz (0-5)</label>
-                            <input type="range" class="form-range" min="0" max="5" step="1" oninput="updLive(this)">
+                            <input type="range" class="form-range" min="0" max="5" step="1" value="0"
+                                oninput="updLive(this)">
                             <div class="text-end fw-bold text-primary">0</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">2. Calidad presentación (0-5)</label>
-                            <input type="range" class="form-range" min="0" max="5" step="1" oninput="updLive(this)">
+                            <label class="form-label fw-bold">2. Calidad de presentación (0-5)</label>
+                            <input type="range" class="form-range" min="0" max="5" step="1" value="0"
+                                oninput="updLive(this)">
                             <div class="text-end fw-bold text-primary">0</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">3. Dominio del contenido (0-5)</label>
-                            <input type="range" class="form-range" min="0" max="5" step="1" oninput="updLive(this)">
+                            <input type="range" class="form-range" min="0" max="5" step="1" value="0"
+                                oninput="updLive(this)">
                             <div class="text-end fw-bold text-primary">0</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">4. Lenguaje corporal (0-5)</label>
-                            <input type="range" class="form-range" min="0" max="5" step="1" oninput="updLive(this)">
+                            <input type="range" class="form-range" min="0" max="5" step="1" value="0"
+                                oninput="updLive(this)">
                             <div class="text-end fw-bold text-primary">0</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">5. Recursos visuales (0-5)</label>
-                            <input type="range" class="form-range" min="0" max="5" step="1" oninput="updLive(this)">
+                            <input type="range" class="form-range" min="0" max="5" step="1" value="0"
+                                oninput="updLive(this)">
                             <div class="text-end fw-bold text-primary">0</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">6. Comunicación escrita (0-5)</label>
-                            <input type="range" class="form-range" min="0" max="5" step="1" oninput="updLive(this)">
+                            <input type="range" class="form-range" min="0" max="5" step="1" value="0"
+                                oninput="updLive(this)">
                             <div class="text-end fw-bold text-primary">0</div>
                         </div>
 
                         <div class="alert alert-secondary text-center">
-                            Total: <span id="liveTotal">0</span> / 30
+                            Total: <span id="liveTotal" class="fw-bold fs-5">0</span> / 30
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Comentarios Adicionales</label>
-                            <textarea class="form-control" id="liveComments"></textarea>
+                            <label class="form-label">Comentarios adicionales</label>
+                            <textarea class="form-control" id="liveComments" rows="3"
+                                placeholder="Observaciones sobre la presentación en vivo..."></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" onclick="submitLive()">✅ Enviar Calificación</button>
+                    <button type="button" class="btn btn-success fw-bold" onclick="submitLive()">
+                        ✅ Enviar Calificación
+                    </button>
                 </div>
             </div>
         </div>
@@ -160,112 +241,218 @@
     <script src="js/evaluation-assignment.js"></script>
     <script>
         let session = null;
-        let currentLiveId = null; // ID Asignación Fase 2
-        let currentLiveWorkId = null;
+        let currentAssignmentId = null; // Fase 1
+        let currentWorkId = null;       // Fase 1
+        let currentLiveId = null;       // Fase 2
+        let currentLiveWorkId = null;   // Fase 2
 
         document.addEventListener('DOMContentLoaded', async () => {
             session = await window.apiClient.checkAuth();
             if (!session) return window.location.href = 'login.html';
-
             loadPhase1();
             loadPhase2();
         });
 
-        // Cargar Fase 1 (Código existente reutilizado)
-        async function loadPhase1() {
-            const system = new EvaluationAssignment();
-            const assigns = await system.getAssignedWorks(session.user.id);
-            const container = document.getElementById('phase1List');
+        // ============================================================
+        // FASE 1 — Evaluación Documental
+        // ============================================================
 
-            if (assigns.length === 0) { container.innerHTML = '<p class="text-muted text-center">Sin asignaciones pendientes.</p>'; return; }
+        async function loadPhase1() {
+            const container = document.getElementById('phase1List');
+            container.innerHTML = `<div class="col-12 text-center py-4">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-2 text-muted">Cargando...</p>
+    </div>`;
+
+            const system = new EvaluationAssignment();
+            // ✅ Solo trae las asignaciones PENDIENTES (status !== 'completed')
+            const assigns = await system.getAssignedWorks(session.user.id);
+
+            if (assigns.length === 0) {
+                container.innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-success text-center">
+            <h5>🎉 ¡Al día!</h5>
+            <p class="mb-0">No tienes evaluaciones documentales pendientes.</p>
+          </div>
+        </div>`;
+                return;
+            }
 
             container.innerHTML = assigns.map(a => `
-                <div class="col-md-6 mb-3">
-                    <div class="card work-card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="text-primary">${a.works.title}</h5>
-                            <small class="text-muted">Fase Documental</small>
-                            ${a.status === 'completed' ? '<br><span class="badge bg-secondary">Evaluado</span>' :
-                    `<br><button class="btn btn-primary btn-sm mt-2">Evaluar Documento</button>`} 
-                            <!-- Nota: Aquí deberías conectar tu función openEvaluation antigua -->
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+      <div class="col-md-6 mb-3">
+        <div class="card work-card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="text-primary mb-1">${a.works?.title || 'Sin título'}</h5>
+            <p class="mb-1 text-muted"><small>📅 Semestre: ${a.works?.semester || 'N/D'}</small></p>
+            <p class="mb-2 text-muted"><small>👤 Alumno: ${a.works?.student_name || 'N/D'}</small></p>
+            <button class="btn btn-primary btn-sm w-100 mt-2"
+              onclick="openEval('${a.id}', '${a.work_id}', \`${(a.works?.title || '').replace(/`/g, "'")}\`, '${a.works?.url || ''}', '${a.works?.semester || ''}')">
+              📝 Evaluar Documento
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
         }
 
-        // Cargar Fase 2
-        async function loadPhase2() {
-            const allLive = await window.apiClient.getLiveAssignments();
-            // Filtrar las mías
-            const myLive = allLive.filter(a => a.evaluator_id === session.user.id);
-            const container = document.getElementById('phase2List');
+        // ✅ RESTAURADO: Abre el modal de evaluación Fase 1
+        function openEval(assignId, workId, title, url, semester) {
+            currentAssignmentId = assignId;
+            currentWorkId = workId;
+            document.getElementById('evalWorkTitle').innerText = title;
+            document.getElementById('evalWorkSemester').innerText = semester ? `📅 Semestre: ${semester}` : '';
+            const urlEl = document.getElementById('evalWorkUrl');
+            urlEl.href = url || '#';
+            urlEl.style.display = url ? 'inline-block' : 'none';
+            // Limpiar formulario
+            document.getElementById('evalScore').value = '';
+            document.getElementById('evalModality').value = '';
+            document.getElementById('evalComments').value = '';
+            new bootstrap.Modal(document.getElementById('evalModal')).show();
+        }
 
-            if (myLive.length === 0) { container.innerHTML = '<p class="text-muted text-center">No tienes evaluaciones presenciales asignadas aún.</p>'; return; }
+        // ✅ RESTAURADO: Envía la evaluación Fase 1
+        async function submitEval() {
+            const score = parseInt(document.getElementById('evalScore').value);
+            const modality = document.getElementById('evalModality').value;
+            const comments = document.getElementById('evalComments').value.trim();
+
+            if (isNaN(score) || score < 0 || score > 100) {
+                alert('⚠️ Ingresa una puntuación válida entre 0 y 100.');
+                return;
+            }
+            if (!modality) {
+                alert('⚠️ Selecciona una modalidad sugerida.');
+                return;
+            }
+            if (!confirm('¿Enviar evaluación? Esta acción no se puede deshacer.')) return;
+
+            const btn = document.querySelector('#evalModal .btn-success');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+
+            const data = {
+                action: 'submitEvaluation',
+                work_id: currentWorkId,
+                evaluator_id: session.user.id,
+                assignment_id: currentAssignmentId,
+                total_score: score,
+                modalidad_sugerida: modality,
+                comentarios: comments
+            };
+
+            const res = await window.apiClient.post(data);
+
+            btn.disabled = false;
+            btn.innerHTML = '✅ Enviar Evaluación';
+
+            if (res.success) {
+                bootstrap.Modal.getInstance(document.getElementById('evalModal')).hide();
+                alert('✅ Evaluación enviada correctamente.');
+                loadPhase1(); // Recargar lista (el trabajo evaluado desaparecerá)
+            } else {
+                alert('❌ Error al enviar: ' + res.error);
+            }
+        }
+
+        // ============================================================
+        // FASE 2 — Evaluación Presencial
+        // ============================================================
+
+        async function loadPhase2() {
+            const container = document.getElementById('phase2List');
+            const allLive = await window.apiClient.getLiveAssignments();
+            const myLive = allLive.filter(a => a.evaluator_id === session.user.id);
+
+            if (myLive.length === 0) {
+                container.innerHTML = `<div class="col-12">
+        <div class="alert alert-secondary text-center">
+          No tienes evaluaciones presenciales asignadas aún.
+        </div>
+      </div>`;
+                return;
+            }
 
             container.innerHTML = myLive.map(a => `
-                <div class="col-md-6 mb-3">
-                    <div class="card work-card live h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="text-dark" style="color: #6f42c1 !important;">${a.works.title}</h5>
-                            <p class="mb-1"><strong>Modalidad:</strong> ${a.works.status.includes('oral') ? '🎤 Ponencia' : '📊 Cartel'}</p>
-                            <p class="mb-2"><strong>Alumno:</strong> ${a.works.student_name}</p>
-                            ${a.status === 'completed'
-                    ? '<button class="btn btn-secondary w-100" disabled>✅ Evaluado</button>'
-                    : `<button class="btn btn-success w-100" style="background-color: #6f42c1;" onclick="openLive('${a.id}', '${a.works.id}', '${a.works.title}')">⭐ Evaluar Presentación</button>`
+      <div class="col-md-6 mb-3">
+        <div class="card work-card live h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="fw-bold mb-1" style="color: #6f42c1;">${a.works?.title || 'Sin título'}</h5>
+            <p class="mb-1"><strong>Modalidad:</strong>
+              ${(a.works?.status || '').includes('oral') ? '🎤 Ponencia' : '📊 Cartel'}
+            </p>
+            <p class="mb-2"><strong>Equipo:</strong> ${a.works?.student_name || 'N/D'}</p>
+            ${a.status === 'completed'
+                    ? '<button class="btn btn-secondary w-100" disabled>✅ Ya evaluado</button>'
+                    : `<button class="btn w-100 text-white fw-bold" style="background-color:#6f42c1;"
+                  onclick="openLive('${a.id}', '${a.work_id}', \`${(a.works?.title || '').replace(/`/g, "'")}\`)">
+                  ⭐ Evaluar Presentación
+                </button>`
                 }
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+          </div>
+        </div>
+      </div>
+    `).join('');
         }
 
-        // Abrir Modal Fase 2
         function openLive(assignId, workId, title) {
             currentLiveId = assignId;
             currentLiveWorkId = workId;
             document.getElementById('liveWorkTitle').innerText = title;
             document.getElementById('liveForm').reset();
-            document.querySelectorAll('#liveForm .fw-bold.text-primary').forEach(e => e.innerText = '0');
+            // Resetear displays de valores
+            document.querySelectorAll('#liveForm .text-end.fw-bold').forEach(el => el.innerText = '0');
             document.getElementById('liveTotal').innerText = '0';
             new bootstrap.Modal(document.getElementById('liveModal')).show();
         }
 
-        // Actualizar números del slider
         function updLive(input) {
             input.nextElementSibling.innerText = input.value;
-            // Calcular total
             let sum = 0;
-            document.querySelectorAll('#liveForm input[type=range]').forEach(r => sum += parseInt(r.value));
+            document.querySelectorAll('#liveForm input[type=range]').forEach(r => sum += parseInt(r.value || 0));
             document.getElementById('liveTotal').innerText = sum;
         }
 
-        // Enviar Fase 2
         async function submitLive() {
-            if (!confirm('¿Enviar calificación presencial?')) return;
+            if (!confirm('¿Enviar calificación presencial? Esta acción no se puede deshacer.')) return;
 
             const inputs = document.querySelectorAll('#liveForm input[type=range]');
-            const scores = Array.from(inputs).map(i => i.value);
+            const scores = Array.from(inputs).map(i => parseInt(i.value || 0));
+            const total = scores.reduce((a, b) => a + b, 0);
 
             const data = {
                 assignment_id: currentLiveId,
                 work_id: currentLiveWorkId,
                 evaluator_id: session.user.id,
-                s1: scores[0], s2: scores[1], s3: scores[2], s4: scores[3], s5: scores[4], s6: scores[5],
-                total_score: document.getElementById('liveTotal').innerText,
+                s1: scores[0], s2: scores[1], s3: scores[2],
+                s4: scores[3], s5: scores[4], s6: scores[5],
+                total_score: total,
                 comments: document.getElementById('liveComments').value
             };
 
+            const btn = document.querySelector('#liveModal .btn-success');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+
             const res = await window.apiClient.submitLiveEvaluation(data);
+
+            btn.disabled = false;
+            btn.innerHTML = '✅ Enviar Calificación';
+
             if (res.success) {
-                alert('✅ Evaluación guardada');
-                location.reload();
+                bootstrap.Modal.getInstance(document.getElementById('liveModal')).hide();
+                alert('✅ Evaluación presencial guardada.');
+                loadPhase2();
             } else {
-                alert('Error: ' + res.error);
+                alert('❌ Error: ' + res.error);
             }
         }
 
-        async function logout() { await window.apiClient.logoutUser(); window.location.href = 'index.html'; }
+        async function logout() {
+            await window.apiClient.logoutUser();
+            window.location.href = 'index.html';
+        }
     </script>
 </body>
 

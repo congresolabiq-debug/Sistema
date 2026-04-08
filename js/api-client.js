@@ -1,5 +1,4 @@
-// --- CONFIGURACIÓN ---
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_W5ZMzbUY-VQ0TgWqAKTGnB38EAWUfbTbXF_wICylArzTcy8KO_2FQho2FeXtGHdmdA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznqA_TVDazwgXzgG64Dx30JvCfoJSA9n-BXpD9PGLsQNHwuzXNFmGCl1_dy7yxW4Klcg/exec';
 
 // --- GESTIÓN DE SESIÓN LOCAL ---
 function saveSession(user) { localStorage.setItem('congreso_user', JSON.stringify(user)); }
@@ -11,7 +10,7 @@ const apiClient = {
     // Autenticación
     async loginUser(email, password) {
         try {
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&email=${email}&password=${password}`);
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
             const json = await res.json();
             if (json.success) saveSession(json.data.profile);
             return json;
@@ -34,6 +33,8 @@ const apiClient = {
         return s ? { user: { id: s.id } } : null;
     },
 
+    logoutUser,
+
     // Trabajos
     async submitWork(workData, file) {
         try {
@@ -44,7 +45,7 @@ const apiClient = {
                 title: workData.title,
                 abstract: workData.abstract,
                 semester: workData.semester,
-                team_members: workData.team_members, // <--- AÑADIDO
+                team_members: workData.team_members,
                 modality: "Pendiente",
                 fileName: file.name,
                 fileBase64: base64.split(',')[1]
@@ -85,9 +86,13 @@ const apiClient = {
         });
     },
 
+    // ✅ NUEVO: Asignar TODOS los trabajos pendientes en una sola llamada al backend
+    async assignAllPending() {
+        return await postData({ action: 'assignAllPending' });
+    },
+
     // Evaluación
     async submitEvaluation(evaluationData) {
-        // Aseguramos que action esté presente
         evaluationData.action = 'submitEvaluation';
         return await postData(evaluationData);
     },
@@ -102,17 +107,13 @@ const apiClient = {
     },
 
     async finalizeAndNotify(workId) {
-        return await postData({
-            action: 'finalizeAndNotify',
-            work_id: workId
-        });
+        return await postData({ action: 'finalizeAndNotify', work_id: workId });
     },
 
     async batchFinalize() {
-        return await postData({
-            action: 'batchFinalize'
-        });
+        return await postData({ action: 'batchFinalize' });
     },
+
     async assignLiveWorks() {
         return await postData({ action: 'assignLiveWorks' });
     },
@@ -135,11 +136,13 @@ const apiClient = {
     },
 
     async generateCertificates(workId) {
-        return await postData({
-            action: 'generateCertificates',
-            work_id: workId
-        });
+        return await postData({ action: 'generateCertificates', work_id: workId });
     },
+
+    // ✅ Método genérico POST expuesto para llamadas directas desde el HTML
+    async post(data) {
+        return await postData(data);
+    }
 };
 
 // --- HELPERS ---
@@ -164,5 +167,4 @@ const toBase64 = file => new Promise((resolve, reject) => {
 
 // Exponer globalmente
 window.apiClient = apiClient;
-// Mantener compatibilidad temporal si es necesario
-window.supabaseClient = apiClient; 
+window.supabaseClient = apiClient; // compatibilidad
