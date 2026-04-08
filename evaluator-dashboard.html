@@ -112,172 +112,207 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL FASE 1 RESTAURADO Y COMPLETO -->
-    <!-- ✅ MODAL FASE 1 CON RÚBRICA DETALLADA -->
+    <!-- ✅ MODAL FASE 1 CON SLIDERS (RÚBRICA DETALLADA) -->
     <div class="modal fade" id="evalModal" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-xl"> <!-- Usamos modal-xl para que quepa la rúbrica -->
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">📋 Evaluación Documental (Rúbrica Oficial)</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row mb-3">
+                    <div class="row mb-3 align-items-center">
                         <div class="col-md-8">
-                            <h6 id="evalWorkTitle" class="text-primary mb-1 fw-bold"></h6>
-                            <p id="evalWorkSemester" class="text-muted mb-0"></p>
+                            <h5 id="evalWorkTitle" class="text-primary fw-bold mb-1"></h5>
+                            <span id="evalWorkSemester" class="badge bg-secondary"></span>
                         </div>
                         <div class="col-md-4 text-end">
-                            <a id="evalWorkUrl" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
-                                📄 Abrir PDF del trabajo
+                            <a id="evalWorkUrl" href="#" target="_blank" class="btn btn-outline-primary fw-bold">
+                                📄 Leer Trabajo (PDF)
                             </a>
                         </div>
                     </div>
 
                     <div class="row">
-                        <!-- PARTE 1: CRITERIOS DE CONTENIDO (90%) -->
+                        <!-- PARTE 1: ESTRUCTURA (90%) -->
                         <div class="col-lg-7 border-end">
-                            <h6 class="bg-light p-2 fw-bold border-start border-primary border-4">Parte 1: Estructura
-                                del Documento (90 pts)</h6>
+                            <h6 class="bg-light p-2 fw-bold border-start border-primary border-4 mb-3">Parte 1:
+                                Contenido del Documento (90 pts)</h6>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Resumen (0-10)</label>
-                                    <div class="text-muted small">Estructura, ¿Qué se hizo?, ¿Cuál fue el resultado?
-                                    </div>
+                            <!-- Criterio: Resumen -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Resumen (0-10%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_resumen">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input" id="r_resumen"
-                                        min="0" max="10" value="0"></div>
+                                <small class="text-muted d-block mb-1">Estructura, ¿Qué se hizo?, ¿Cuál fue el
+                                    resultado?</small>
+                                <input type="range" class="form-range rubric-slider" id="r_resumen" min="0" max="10"
+                                    step="1" value="0">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Justificación (0-10)</label>
-                                    <div class="text-muted small">Problema detectado e ideas clave claras.</div>
+                            <!-- Criterio: Justificación -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Justificación (0-10%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_justificacion">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input"
-                                        id="r_justificacion" min="0" max="10" value="0"></div>
+                                <small class="text-muted d-block mb-1">Problema detectado e ideas clave claras.</small>
+                                <input type="range" class="form-range rubric-slider" id="r_justificacion" min="0"
+                                    max="10" step="1" value="0">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Objetivos (0-15)</label>
-                                    <div class="text-muted small">Taxonomía de Bloom, objetivo general y específicos.
-                                    </div>
+                            <!-- Criterio: Objetivos -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Objetivos (0-15%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_objetivos">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input"
-                                        id="r_objetivos" min="0" max="15" value="0"></div>
+                                <small class="text-muted d-block mb-1">Taxonomía de Bloom, objetivo general y
+                                    específicos.</small>
+                                <input type="range" class="form-range rubric-slider" id="r_objetivos" min="0" max="15"
+                                    step="1" value="0">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Introducción (0-10)</label>
-                                    <div class="text-muted small">Contraste de teorías, congruencia y bibliografía.
-                                    </div>
+                            <!-- Criterio: Introducción -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Introducción (0-10%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_introduccion">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input"
-                                        id="r_introduccion" min="0" max="10" value="0"></div>
+                                <small class="text-muted d-block mb-1">Contraste de teorías y referencias
+                                    bibliográficas.</small>
+                                <input type="range" class="form-range rubric-slider" id="r_introduccion" min="0"
+                                    max="10" step="1" value="0">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Metodología (0-10)</label>
-                                    <div class="text-muted small">Materiales, herramientas y procedimientos.</div>
+                            <!-- Criterio: Metodología -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Metodología (0-10%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_metodologia">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input"
-                                        id="r_metodologia" min="0" max="10" value="0"></div>
+                                <small class="text-muted d-block mb-1">Materiales, herramientas y
+                                    procedimientos.</small>
+                                <input type="range" class="form-range rubric-slider" id="r_metodologia" min="0" max="10"
+                                    step="1" value="0">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Resultados y Análisis (0-15)</label>
-                                    <div class="text-muted small">Tratamiento de datos, cuadros/figuras y formato.</div>
+                            <!-- Criterio: Resultados -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Resultados y Análisis (0-15%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_resultados">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input"
-                                        id="r_resultados" min="0" max="15" value="0"></div>
+                                <small class="text-muted d-block mb-1">Tratamiento de datos, cuadros, figuras y
+                                    formato.</small>
+                                <input type="range" class="form-range rubric-slider" id="r_resultados" min="0" max="15"
+                                    step="1" value="0">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Conclusiones (0-15)</label>
-                                    <div class="text-muted small">Relación con el cumplimiento de objetivos.</div>
+                            <!-- Criterio: Conclusiones -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Conclusiones (0-15%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_conclusiones">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input"
-                                        id="r_conclusiones" min="0" max="15" value="0"></div>
+                                <small class="text-muted d-block mb-1">Relación con el cumplimiento de
+                                    objetivos.</small>
+                                <input type="range" class="form-range rubric-slider" id="r_conclusiones" min="0"
+                                    max="15" step="1" value="0">
                             </div>
 
-                            <div class="row g-2 mb-3">
-                                <div class="col-9">
-                                    <label class="small fw-bold">Referencias (0-5)</label>
-                                    <div class="text-muted small">Bibliografía actual y formato APA 7.</div>
+                            <!-- Criterio: Referencias -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="fw-bold">Referencias (0-5%)</label>
+                                    <span class="badge bg-primary fs-6 rubric-val" id="val_referencias">0</span>
                                 </div>
-                                <div class="col-3"><input type="number" class="form-control rubric-input"
-                                        id="r_referencias" min="0" max="5" value="0"></div>
+                                <small class="text-muted d-block mb-1">Bibliografía actual y formato APA 7.</small>
+                                <input type="range" class="form-range rubric-slider" id="r_referencias" min="0" max="5"
+                                    step="1" value="0">
                             </div>
                         </div>
 
-                        <!-- PARTE 2: PERTINENCIA E IMPACTO (10%) + RESULTADO -->
+                        <!-- PARTE 2: PERTINENCIA (10%) -->
                         <div class="col-lg-5">
-                            <h6 class="bg-light p-2 fw-bold border-start border-success border-4">Parte 2: Pertinencia e
-                                Innovación (10 pts)</h6>
+                            <h6 class="bg-light p-2 fw-bold border-start border-success border-4 mb-3">Parte 2:
+                                Pertinencia e Innovación (10 pts)</h6>
 
-                            <div class="row g-2 mb-2 small">
-                                <div class="col-10">Factibilidad y pertinencia (0-2)</div>
-                                <div class="col-2"><input type="number"
-                                        class="form-control form-control-sm rubric-input" id="r_factibilidad" min="0"
-                                        max="2" value="0"></div>
-                            </div>
-                            <div class="row g-2 mb-2 small">
-                                <div class="col-10">Innovación (0-2)</div>
-                                <div class="col-2"><input type="number"
-                                        class="form-control form-control-sm rubric-input" id="r_innovacion" min="0"
-                                        max="2" value="0"></div>
-                            </div>
-                            <div class="row g-2 mb-2 small">
-                                <div class="col-10">Integración de conocimientos (0-2)</div>
-                                <div class="col-2"><input type="number"
-                                        class="form-control form-control-sm rubric-input" id="r_integracion" min="0"
-                                        max="2" value="0"></div>
-                            </div>
-                            <div class="row g-2 mb-2 small">
-                                <div class="col-10">Cumplimiento del Programa (0-2)</div>
-                                <div class="col-2"><input type="number"
-                                        class="form-control form-control-sm rubric-input" id="r_programa" min="0"
-                                        max="2" value="0"></div>
-                            </div>
-                            <div class="row g-2 mb-3 small">
-                                <div class="col-10">Ética y valores (0-2)</div>
-                                <div class="col-2"><input type="number"
-                                        class="form-control form-control-sm rubric-input" id="r_etica" min="0" max="2"
-                                        value="0"></div>
-                            </div>
-
-                            <div class="alert alert-info py-2 text-center">
-                                <div class="small fw-bold">PUNTUACIÓN TOTAL CALCULADA</div>
-                                <div class="h2 mb-0"><span id="totalRubricScore">0</span> / 100</div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small">
+                                    <span>Factibilidad y pertinencia (0-2)</span>
+                                    <span class="fw-bold text-success rubric-val" id="val_factibilidad">0</span>
+                                </div>
+                                <input type="range" class="form-range rubric-slider" id="r_factibilidad" min="0" max="2"
+                                    step="1" value="0">
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Modalidad Sugerida *</label>
-                                <select class="form-select" id="evalModality" required>
-                                    <option value="">-- Selecciona --</option>
+                                <div class="d-flex justify-content-between small">
+                                    <span>Innovación (0-2)</span>
+                                    <span class="fw-bold text-success rubric-val" id="val_innovacion">0</span>
+                                </div>
+                                <input type="range" class="form-range rubric-slider" id="r_innovacion" min="0" max="2"
+                                    step="1" value="0">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small">
+                                    <span>Integración de conocimientos (0-2)</span>
+                                    <span class="fw-bold text-success rubric-val" id="val_integracion">0</span>
+                                </div>
+                                <input type="range" class="form-range rubric-slider" id="r_integracion" min="0" max="2"
+                                    step="1" value="0">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small">
+                                    <span>Cumplimiento del Programa (0-2)</span>
+                                    <span class="fw-bold text-success rubric-val" id="val_programa">0</span>
+                                </div>
+                                <input type="range" class="form-range rubric-slider" id="r_programa" min="0" max="2"
+                                    step="1" value="0">
+                            </div>
+
+                            <div class="mb-3 border-bottom pb-2">
+                                <div class="d-flex justify-content-between small">
+                                    <span>Ética y valores (0-2)</span>
+                                    <span class="fw-bold text-success rubric-val" id="val_etica">0</span>
+                                </div>
+                                <input type="range" class="form-range rubric-slider" id="r_etica" min="0" max="2"
+                                    step="1" value="0">
+                            </div>
+
+                            <!-- TOTAL -->
+                            <div class="card bg-dark text-white text-center mb-4 shadow">
+                                <div class="card-body py-2">
+                                    <small class="text-uppercase opacity-75">Calificación Final</small>
+                                    <h2 class="mb-0 fw-bold"><span id="totalRubricScore">0</span> / 100</h2>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-primary">Modalidad Sugerida *</label>
+                                <select class="form-select border-primary" id="evalModality" required>
+                                    <option value="">-- Selecciona una opción --</option>
                                     <option value="ponencia">🎤 Ponencia (Oral)</option>
                                     <option value="poster">📊 Cartel (Póster)</option>
                                 </select>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Comentarios del Proyecto</label>
-                                <textarea class="form-control" id="evalComments" rows="3"
-                                    placeholder="Observaciones para el alumno..."></textarea>
+                                <label class="form-label fw-bold">Comentarios y Retroalimentación</label>
+                                <textarea class="form-control" id="evalComments" rows="4"
+                                    placeholder="Escribe aquí las observaciones para el alumno..."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success fw-bold" onclick="submitEval()">
-                        ✅ Enviar Evaluación Completa
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success btn-lg fw-bold" onclick="submitEval()">
+                        🚀 Guardar Evaluación
                     </button>
                 </div>
             </div>
@@ -433,10 +468,25 @@
         // ✅ RESTAURADO: Envía la evaluación Fase 1
         // --- Lógica para sumar la rúbrica automáticamente ---
         document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('rubric-input')) {
-                calculateRubricTotal();
+            if (e.target.classList.contains('rubric-slider')) {
+                // Actualizar el número visual a la derecha del slider
+                const valId = e.target.id.replace('r_', 'val_');
+                const display = document.getElementById(valId);
+                if (display) display.innerText = e.target.value;
+
+                // Calcular el total
+                updateTotalScore();
             }
         });
+
+        function updateTotalScore() {
+            let total = 0;
+            document.querySelectorAll('.rubric-slider').forEach(slider => {
+                total += parseInt(slider.value || 0);
+            });
+            document.getElementById('totalRubricScore').innerText = total;
+            return total;
+        }
 
         function calculateRubricTotal() {
             let total = 0;
@@ -458,60 +508,66 @@
         function openEval(assignId, workId, title, url, semester) {
             currentAssignmentId = assignId;
             currentWorkId = workId;
+
+            // Títulos y datos básicos
             document.getElementById('evalWorkTitle').innerText = title;
-            document.getElementById('evalWorkSemester').innerText = semester ? `📅 Semestre: ${semester}` : '';
+            document.getElementById('evalWorkSemester').innerText = semester || 'Sin semestre';
             const urlEl = document.getElementById('evalWorkUrl');
             urlEl.href = url || '#';
 
-            // Limpiar todos los campos de la rúbrica
-            document.querySelectorAll('.rubric-input').forEach(input => input.value = 0);
+            // Reiniciar Sliders y Valores Visuales
+            document.querySelectorAll('.rubric-slider').forEach(slider => slider.value = 0);
+            document.querySelectorAll('.rubric-val').forEach(span => span.innerText = '0');
             document.getElementById('totalRubricScore').innerText = '0';
+
+            // Reiniciar select y comentarios
             document.getElementById('evalModality').value = '';
             document.getElementById('evalComments').value = '';
 
             new bootstrap.Modal(document.getElementById('evalModal')).show();
         }
 
-        // --- Modificación de submitEval para capturar la suma ---
+        // Enviar la evaluación
         async function submitEval() {
-            const totalScore = calculateRubricTotal();
+            const finalScore = updateTotalScore();
             const modality = document.getElementById('evalModality').value;
             const comments = document.getElementById('evalComments').value.trim();
 
             if (!modality) {
-                alert('⚠️ Debes sugerir una modalidad (Ponencia o Cartel).');
+                alert('⚠️ Por favor selecciona una modalidad sugerida (Ponencia o Cartel).');
                 return;
             }
 
-            if (!confirm(`¿Enviar evaluación con puntaje de ${totalScore}/100?`)) return;
+            if (!confirm(`¿Confirmas la evaluación con un puntaje de ${finalScore}/100?`)) return;
 
             const btn = document.querySelector('#evalModal .btn-success');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Guardando...';
 
-            // Construimos el objeto de datos. 
-            // Nota: Seguimos enviando 'total_score' para que el backend actualice la hoja de cálculo como antes.
             const data = {
                 action: 'submitEvaluation',
                 work_id: currentWorkId,
                 evaluator_id: session.user.id,
                 assignment_id: currentAssignmentId,
-                total_score: totalScore,
+                total_score: finalScore,
                 modalidad_sugerida: modality,
                 comentarios: comments
             };
 
-            const res = await window.apiClient.post(data);
-
-            btn.disabled = false;
-            btn.innerHTML = '✅ Enviar Evaluación Completa';
-
-            if (res.success) {
-                bootstrap.Modal.getInstance(document.getElementById('evalModal')).hide();
-                alert('✅ Evaluación guardada y sumada correctamente.');
-                loadPhase1();
-            } else {
-                alert('❌ Error al enviar: ' + res.error);
+            try {
+                const res = await window.apiClient.post(data);
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('evalModal')).hide();
+                    alert('✅ Evaluación enviada con éxito.');
+                    loadPhase1(); // Recargar la lista de pendientes
+                } else {
+                    alert('❌ Error: ' + res.error);
+                }
+            } catch (e) {
+                alert('❌ Error de conexión: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Guardar Evaluación';
             }
         }
         // ============================================================
