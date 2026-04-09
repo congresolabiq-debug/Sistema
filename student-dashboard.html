@@ -103,7 +103,21 @@
                 const feedbackBtn = hasFeedback
                     ? `<button class="btn btn-sm btn-outline-info mt-2" onclick="showFeedback('${escapeHtml(w.feedback)}')">👁️ Ver Retroalimentación</button>`
                     : '';
-
+                // Dentro del .map de works en student-dashboard.html
+                return `
+    <div class="card mb-3 work-card status-${w.status} shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <h5 class="card-title">
+                    <span class="badge bg-dark me-2">${w.short_id || ''}</span> 
+                    ${w.title}
+                </h5>
+                <a href="${w.file_url}" target="_blank" class="btn btn-sm btn-light border">📎 PDF</a>
+            </div>
+            ...
+        </div>
+    </div>
+`;
                 return `
                     <div class="card mb-3 work-card status-${w.status} shadow-sm">
                         <div class="card-body">
@@ -122,6 +136,7 @@
                         </div>
                     </div>
                 `;
+
             }).join('');
         });
 

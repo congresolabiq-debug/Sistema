@@ -145,6 +145,19 @@
                             <button class="btn btn-primary btn-lg" onclick="assignLiveJudges()">
                                 🎲 Asignar evaluadores Fase 2
                             </button>
+                            <!-- Dentro de eventSection en admin-dashboard.html -->
+                            <div class="card mb-4 border-warning bg-light">
+                                <div class="card-body d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="text-warning">⚠️ Caso de Emergencia</h5>
+                                        <p class="mb-0 small">Si un juez no asistió, asigna a un profesor disponible a
+                                            un trabajo específico.</p>
+                                    </div>
+                                    <button class="btn btn-warning" onclick="openEmergencyModal()">
+                                        🚑 Asignar Juez de Emergencia
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -186,6 +199,30 @@
                 <div class="modal-body text-center py-4">
                     <div class="spinner-border text-primary mb-3"></div>
                     <h5 id="progressMessage">Procesando...</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Emergencia -->
+    <div class="modal fade" id="emergencyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Asignación de Emergencia (Fase 2)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar Trabajo</label>
+                        <select id="emWork" class="form-select"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar Profesor Sustituto</label>
+                        <select id="emJudge" class="form-select"></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="submitEmergency()">Asignar Sustituto</button>
                 </div>
             </div>
         </div>
@@ -234,7 +271,35 @@
                 calculateReadyWorks();
             } catch (e) { alert('Error al cargar: ' + e.message); }
         }
+        async function openEmergencyModal() {
+            const works = allWorks.filter(w => w.status.includes('accepted'));
+            const judges = await window.apiClient.getEvaluators();
 
+            document.getElementById('emWork').innerHTML = works.map(w => `<option value="${w.id}">${w.title} (${w.grupo})</option>`).join('');
+            document.getElementById('emJudge').innerHTML = judges.map(j => `<option value="${j.id}">${j.name}</option>`).join('');
+
+            new bootstrap.Modal(document.getElementById('emergencyModal')).show();
+        }
+
+        async function submitEmergency() {
+            const work_id = document.getElementById('emWork').value;
+            const evaluator_id = document.getElementById('emJudge').value;
+
+            if (!confirm("¿Asignar este juez de emergencia?")) return;
+
+            const res = await window.apiClient.post({
+                action: 'assignManualLive',
+                work_id,
+                evaluator_id
+            });
+
+            if (res.success) {
+                alert("✅ Juez asignado. Ya puede ver el trabajo en su panel.");
+                location.reload();
+            } else {
+                alert("❌ " + res.error);
+            }
+        }
         function renderAssignmentsList() {
             const container = document.getElementById('assignmentsList');
             if (!allAssignmentsCache.length) {
@@ -246,6 +311,7 @@
       <div class="card mb-2 shadow-sm">
         <div class="card-body py-2 row align-items-center">
           <div class="col-8">
+            <span class="badge bg-secondary me-1">${a.works?.short_id || ''}</span>
             <strong>${a.works?.title || 'Sin título'}</strong><br>
             <small class="text-muted">👨‍🏫 ${a.user_profiles?.name || 'Evaluador desconocido'}</small>
           </div>
@@ -461,6 +527,7 @@
             }
         }
     </script>
+
 </body>
 
 </html>

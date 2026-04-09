@@ -436,6 +436,7 @@
       <div class="col-md-6 mb-3">
         <div class="card work-card h-100 shadow-sm">
           <div class="card-body">
+            <div class="badge bg-primary mb-2">${a.works?.short_id || ''}</div>
             <h5 class="text-primary mb-1">${a.works?.title || 'Sin título'}</h5>
             <p class="mb-1 text-muted"><small>📅 Semestre: ${a.works?.semester || 'N/D'}</small></p>
             <p class="mb-2 text-muted"><small>👤 Alumno: ${a.works?.student_name || 'N/D'}</small></p>
@@ -592,6 +593,10 @@
       <div class="col-md-6 mb-3">
         <div class="card work-card live h-100 shadow-sm">
           <div class="card-body">
+            <div class="d-flex justify-content-between">
+                    <span class="badge bg-purple text-white mb-2" style="background:#6f42c1;">${a.works?.short_id || ''}</span>
+                    <small class="text-muted">${a.works?.auditorio || ''}</small>
+                </div>
             <h5 class="fw-bold mb-1" style="color: #6f42c1;">${a.works?.title || 'Sin título'}</h5>
             <p class="mb-1"><strong>Modalidad:</strong>
               ${(a.works?.status || '').includes('oral') ? '🎤 Ponencia' : '📊 Cartel'}
