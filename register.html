@@ -37,8 +37,8 @@
                             <div class="mb-3">
                                 <label class="form-label">Tipo de Usuario</label>
                                 <select class="form-select" id="userType" onchange="toggleAdminCode()" required>
-                                    <option value="student">Alumno</option>
-                                    <option value="evaluator">Evaluador/Profesor</option>
+                                    <option value="student">Alumna/Alumno</option>
+                                    <option value="evaluator">Evaluador</option>
                                 </select>
                             </div>
 
@@ -49,6 +49,14 @@
                                     placeholder="Ingresa la clave de profesor">
                                 <div class="form-text text-danger">Solo personal autorizado puede registrarse como
                                     evaluador.</div>
+                                <!-- Campo para grupos del profesor (Solo visible para evaluadores) -->
+                                <div class="mb-3 d-none" id="evaluatorGroupsGroup">
+                                    <label class="form-label fw-bold">Grupos a los que imparte clase *</label>
+                                    <input type="text" class="form-control" id="evaluatorGroups"
+                                        placeholder="Ej: 1301, 1305, 2102">
+                                    <div class="form-text">Indica los grupos en los que imparte clase este semestre.
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -73,13 +81,20 @@
         function toggleAdminCode() {
             const type = document.getElementById('userType').value;
             const codeGroup = document.getElementById('adminCodeGroup');
+            const groupsGroup = document.getElementById('evaluatorGroupsGroup'); // Nuevo
+
             if (type === 'evaluator') {
                 codeGroup.classList.remove('d-none');
+                groupsGroup.classList.remove('d-none'); // Mostrar
                 document.getElementById('adminCode').required = true;
+                document.getElementById('evaluatorGroups').required = true; // Hacerlo obligatorio
             } else {
                 codeGroup.classList.add('d-none');
+                groupsGroup.classList.add('d-none'); // Ocultar
                 document.getElementById('adminCode').required = false;
+                document.getElementById('evaluatorGroups').required = false;
                 document.getElementById('adminCode').value = '';
+                document.getElementById('evaluatorGroups').value = '';
             }
         }
 
@@ -92,6 +107,7 @@
             const type = document.getElementById('userType').value;
             const pass = document.getElementById('password').value;
             const adminCode = document.getElementById('adminCode').value;
+            const evaluatorGroups = document.getElementById('evaluatorGroups').value; // Nuevo
 
             // VALIDACIÓN DE SEGURIDAD
             if (type === 'evaluator') {
@@ -104,7 +120,7 @@
             const btn = document.querySelector('button[type="submit"]');
             btn.disabled = true; btn.innerText = "Registrando...";
 
-            const result = await window.apiClient.registerUser(email, pass, name, type);
+            const result = await window.apiClient.registerUser(email, pass, name, type, evaluatorGroups);
 
             if (result.success) {
                 alert('✅ Cuenta creada exitosamente.');

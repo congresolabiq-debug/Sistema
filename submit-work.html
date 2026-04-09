@@ -46,7 +46,8 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html">🎓 Congreso Estudiantil</a>
+            <a class="navbar-brand fw-bold" href="index.html">🎓 Congreso Estudiantil de Laboratorios de Ingeniería
+                Química</a>
             <a class="nav-link text-white" href="student-dashboard.html">← Volver</a>
         </div>
     </nav>
@@ -81,10 +82,27 @@
                             <option value="9no Semestre">9no Semestre</option>
                         </select>
                     </div>
+                    <!-- Grupo -->
+                    <div class="mb-4">
+                        <label for="group" class="form-label fw-bold">Grupo *</label>
+                        <input type="text" class="form-control form-control-lg" id="group" required
+                            placeholder="Ej: 1301 o 2152">
+                    </div>
+
+                    <!-- Profesor a cargo -->
+                    <div class="mb-4">
+                        <label for="professorInCharge" class="form-label fw-bold">Profesor a cargo de la asignatura
+                            *</label>
+                        <input type="text" class="form-control form-control-lg" id="professorInCharge" required
+                            placeholder="Nombre completo del profesor">
+                    </div>
 
                     <!-- INTEGRANTES (NUEVA SECCIÓN) -->
                     <div class="mb-4 p-3 bg-light rounded border">
-                        <label class="form-label fw-bold">Integrantes del Equipo (Autores) *</label>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label fw-bold mb-0">Integrantes del Equipo (Autores) *</label>
+                            <span id="memberCounter" class="badge bg-secondary">0 / 10</span>
+                        </div>
                         <p class="small text-muted mb-2">Ingresa el nombre completo tal como quieres que aparezca en la
                             constancia y presiona "Agregar".</p>
 
@@ -137,9 +155,17 @@
 
         function addMember() {
             const input = document.getElementById('memberInput');
-            const name = input.value.trim().toUpperCase(); // Guardar en mayúsculas para uniformidad
+            const name = input.value.trim().toUpperCase();
 
             if (!name) return;
+
+            // VALIDACIÓN DE LÍMITE (10 personas)
+            if (members.length >= 10) {
+                alert('⚠️ Límite alcanzado: Solo se permiten máximo 10 integrantes por trabajo.');
+                input.value = '';
+                return;
+            }
+
             if (members.includes(name)) return alert('Este integrante ya está en la lista.');
 
             members.push(name);
@@ -154,24 +180,42 @@
 
         function renderMembers() {
             const container = document.getElementById('membersList');
+            const counter = document.getElementById('memberCounter');
+
+            // Actualizar lista visual
             container.innerHTML = members.map((m, i) => `
-            <span class="badge bg-white text-dark border member-badge shadow-sm">
-                👤 ${m} 
-                <button type="button" class="btn-close btn-close-sm ms-2" onclick="removeMember(${i})" style="font-size: 0.5rem;"></button>
-            </span>
-        `).join('');
+        <span class="badge bg-white text-dark border member-badge shadow-sm">
+            👤 ${m} 
+            <button type="button" class="btn-close btn-close-sm ms-2" onclick="removeMember(${i})" style="font-size: 0.5rem;"></button>
+        </span>
+    `).join('');
+
+            // Actualizar contador visual
+            counter.textContent = `${members.length} / 10`;
+
+            // Cambiar color del contador si llega al límite
+            if (members.length >= 10) {
+                counter.className = "badge bg-danger";
+            } else {
+                counter.className = "badge bg-secondary";
+            }
 
             // Ocultar error si ya hay miembros
             if (members.length > 0) document.getElementById('membersError').classList.add('d-none');
-        }
 
-        // Permitir agregar con la tecla Enter
-        document.getElementById('memberInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault(); // Evitar que se envíe el formulario
-                addMember();
+            // Opcional: Bloquear input si ya hay 10
+            const input = document.getElementById('memberInput');
+            const btn = document.querySelector('button[onclick="addMember()"]');
+            if (members.length >= 10) {
+                input.disabled = true;
+                input.placeholder = "Límite de integrantes alcanzado";
+                btn.disabled = true;
+            } else {
+                input.disabled = false;
+                input.placeholder = "Ej: Juan Pérez García";
+                btn.disabled = false;
             }
-        });
+        }
 
         // --- Lógica de Archivos ---
         const area = document.getElementById('fileUploadArea');
@@ -215,12 +259,15 @@
                 // Unimos los nombres en un solo string separado por comas
                 const membersString = members.join(', ');
 
+
                 const workData = {
                     student_id: user.id,
                     title: document.getElementById('title').value,
                     abstract: document.getElementById('abstract').value,
                     semester: document.getElementById('semester').value,
-                    team_members: membersString, // Enviamos el string
+                    group: document.getElementById('group').value, // <--- Nuevo
+                    professor_cargo: document.getElementById('professorInCharge').value, // <--- Nuevo
+                    team_members: membersString,
                     modality: "Pendiente"
                 };
 

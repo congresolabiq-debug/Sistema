@@ -17,9 +17,15 @@ const apiClient = {
         } catch (e) { return { success: false, error: e.message }; }
     },
 
-    async registerUser(email, password, name, userType) {
+    // En api-client.js
+    async registerUser(email, password, name, userType, groups = "") {
         return await postData({
-            action: 'register', email, password, name, user_type: userType
+            action: 'register',
+            email,
+            password,
+            name,
+            user_type: userType,
+            grupos_imparte: groups // Enviamos el nuevo dato
         });
     },
 
@@ -45,6 +51,8 @@ const apiClient = {
                 title: workData.title,
                 abstract: workData.abstract,
                 semester: workData.semester,
+                group: workData.group, // <--- Nuevo
+                professor_cargo: workData.professor_cargo, // <--- Nuevo
                 team_members: workData.team_members,
                 modality: "Pendiente",
                 fileName: file.name,
