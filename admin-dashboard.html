@@ -470,7 +470,7 @@
         <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
           <small class="text-muted text-truncate" style="max-width: 55%;">🎓 ${w.student_name}</small>
           <button class="btn btn-sm btn-outline-primary fw-bold" onclick="generateCertificates('${w.id}')">
-            📜 Generar Constancia
+            📜 Generar Reconocimiento
           </button>
         </div>
       </li>
@@ -487,11 +487,11 @@
             try {
                 const res = await window.apiClient.generateCertificates(workId);
                 if (res.success) {
-                    btn.innerHTML = '✅ PDFs Listos';
+                    btn.innerHTML = '✅ PDF Listo';
                     btn.className = 'btn btn-sm btn-success fw-bold';
                     setTimeout(() => {
-                        if (confirm(`✅ ¡Éxito!\nSe generaron ${res.count} constancias.\n\n¿Quieres abrir la carpeta de Google Drive ahora?`)) {
-                            window.open(res.folderUrl, '_blank');
+                        if (confirm(`✅ ¡Éxito!\nSe generó el reconocimiento del equipo.\n\n¿Quieres abrir el archivo ahora?`)) {
+                            window.open(res.fileUrl, '_blank'); // Abrir el PDF directamente
                         }
                     }, 500);
                 } else {
