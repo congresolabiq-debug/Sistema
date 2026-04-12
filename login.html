@@ -35,20 +35,25 @@
 
                     <div class="mb-4">
                         <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" class="form-control form-control-lg" id="password" required
-                            placeholder="••••••">
-                    </div>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" id="password" required
+                                placeholder="••••••">
+                            <button class="btn btn-outline-secondary" type="button"
+                                onclick="togglePassword('password', this)">
+                                👁️
+                            </button>
+                        </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2 mb-2">
-                        Ingresar al Portal
-                    </button>
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-2">
+                            Ingresar al Portal
+                        </button>
 
-                    <!-- NUEVO: Hipervínculo de Olvidaste tu contraseña -->
-                    <div class="text-center mb-3">
-                        <a class="text-muted small text-decoration-none">
-                            ¿Olvidaste tu contraseña? Envíanos un correo a "sistema.congresolabiq@gmail.com"
-                        </a>
-                    </div>
+                        <!-- NUEVO: Hipervínculo de Olvidaste tu contraseña -->
+                        <div class="text-center mb-3">
+                            <a class="text-muted small text-decoration-none">
+                                ¿Olvidaste tu contraseña? Envíanos un correo a "sistema.congresolabiq@gmail.com"
+                            </a>
+                        </div>
                 </form>
 
                 <div class="text-center">
@@ -83,6 +88,20 @@
                 btn.disabled = false; btn.innerHTML = originalText;
             }
         });
+    </script>
+
+    <script>
+        // Función para alternar visibilidad
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerText = "🔒"; // Cambia el icono a un candado al mostrar
+            } else {
+                input.type = "password";
+                btn.innerText = "👁️"; // Vuelve al ojo al ocultar
+            }
+        }
     </script>
 </body>
 

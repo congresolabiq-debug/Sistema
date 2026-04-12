@@ -45,8 +45,14 @@
                             <!-- CAMPO OCULTO DE CÓDIGO -->
                             <div class="mb-3 d-none" id="adminCodeGroup">
                                 <label class="form-label text-danger fw-bold">Código de Acceso Docente *</label>
-                                <input type="password" class="form-control border-danger" id="adminCode"
-                                    placeholder="Ingresa la clave de profesor">
+                                <div class="input-group">
+                                    <input type="password" class="form-control border-danger" id="adminCode"
+                                        placeholder="Ingresa la clave de profesor">
+                                    <button class="btn btn-outline-danger" type="button"
+                                        onclick="togglePassword('adminCode', this)">
+                                        👁️
+                                    </button>
+                                </div>
                                 <div class="form-text text-danger">Solo personal autorizado puede registrarse como
                                     evaluador.</div>
                                 <!-- Campo para grupos del profesor (Solo visible para evaluadores) -->
@@ -61,7 +67,13 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" minlength="6" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" minlength="6" required>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePassword('password', this)">
+                                        👁️
+                                    </button>
+                                </div>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Registrarse</button>
@@ -130,6 +142,19 @@
                 btn.disabled = false; btn.innerText = "Registrarse";
             }
         });
+    </script>
+
+    <script>
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerHTML = "🔒";
+            } else {
+                input.type = "password";
+                btn.innerHTML = "👁️";
+            }
+        }
     </script>
 </body>
 
