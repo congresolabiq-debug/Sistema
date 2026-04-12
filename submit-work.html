@@ -93,8 +93,19 @@
                     <div class="mb-4">
                         <label for="professorInCharge" class="form-label fw-bold">Profesor a cargo de la asignatura
                             *</label>
-                        <input type="text" class="form-control form-control-lg" id="professorInCharge" required
-                            placeholder="Nombre completo del profesor">
+                        <select class="form-select form-select-lg" id="professorInCharge" required disabled>
+                            <option value="">Primero selecciona un semestre...</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo Manual (Se activa si elige "Otro") -->
+                    <div id="manualProfessorGroup" class="mb-4 d-none">
+                        <label for="manualProfessor" class="form-label fw-bold text-primary">Escribe el nombre completo
+                            del profesor *</label>
+                        <input type="text" class="form-control form-control-lg border-primary" id="manualProfessor"
+                            placeholder="Ej: Dr. Juan Pérez">
+                        <div class="form-text">Si tu profesor no aparece en la lista, escríbelo aquí respetando
+                            mayúsculas y minúsculas.</div>
                     </div>
 
                     <!-- INTEGRANTES (NUEVA SECCIÓN) -->
@@ -150,22 +161,24 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/api-client.js"></script>
     <script>
-        // --- Lógica de Integrantes ---
+        // --- VARIABLES GLOBALES ---
         let members = [];
+        const semesterSelect = document.getElementById('semester');
+        const professorSelect = document.getElementById('professorInCharge');
+        const manualGroup = document.getElementById('manualProfessorGroup');
+        const manualInput = document.getElementById('manualProfessor');
+        const fileInput = document.getElementById('fileInput');
 
+        // --- 1. LÓGICA DE INTEGRANTES (MÁXIMO 10) ---
         function addMember() {
             const input = document.getElementById('memberInput');
             const name = input.value.trim().toUpperCase();
 
             if (!name) return;
-
-            // VALIDACIÓN DE LÍMITE (10 personas)
             if (members.length >= 10) {
-                alert('⚠️ Límite alcanzado: Solo se permiten máximo 10 integrantes por trabajo.');
-                input.value = '';
+                alert('⚠️ Límite alcanzado: Solo se permiten máximo 10 integrantes.');
                 return;
             }
-
             if (members.includes(name)) return alert('Este integrante ya está en la lista.');
 
             members.push(name);
@@ -181,8 +194,9 @@
         function renderMembers() {
             const container = document.getElementById('membersList');
             const counter = document.getElementById('memberCounter');
+            const input = document.getElementById('memberInput');
+            const btn = document.querySelector('button[onclick="addMember()"]');
 
-            // Actualizar lista visual
             container.innerHTML = members.map((m, i) => `
         <span class="badge bg-white text-dark border member-badge shadow-sm">
             👤 ${m} 
@@ -190,98 +204,131 @@
         </span>
     `).join('');
 
-            // Actualizar contador visual
             counter.textContent = `${members.length} / 10`;
+            counter.className = members.length >= 10 ? "badge bg-danger" : "badge bg-secondary";
 
-            // Cambiar color del contador si llega al límite
-            if (members.length >= 10) {
-                counter.className = "badge bg-danger";
-            } else {
-                counter.className = "badge bg-secondary";
-            }
+            // Bloquear si llega a 10
+            const isFull = members.length >= 10;
+            input.disabled = isFull;
+            input.placeholder = isFull ? "Límite alcanzado" : "Ej: Juan Pérez García";
+            btn.disabled = isFull;
 
-            // Ocultar error si ya hay miembros
             if (members.length > 0) document.getElementById('membersError').classList.add('d-none');
-
-            // Opcional: Bloquear input si ya hay 10
-            const input = document.getElementById('memberInput');
-            const btn = document.querySelector('button[onclick="addMember()"]');
-            if (members.length >= 10) {
-                input.disabled = true;
-                input.placeholder = "Límite de integrantes alcanzado";
-                btn.disabled = true;
-            } else {
-                input.disabled = false;
-                input.placeholder = "Ej: Juan Pérez García";
-                btn.disabled = false;
-            }
         }
 
-        // --- Lógica de Archivos ---
+        // --- 2. LÓGICA DE PROFESORES DINÁMICOS ---
+
+        // Detectar cambio de semestre para cargar lista de profesores
+        semesterSelect.addEventListener('change', async () => {
+            const selectedSemester = semesterSelect.value;
+            manualGroup.classList.add('d-none'); // Esconder campo manual al cambiar semestre
+
+            if (!selectedSemester) {
+                professorSelect.disabled = true;
+                professorSelect.innerHTML = '<option value="">Primero selecciona un semestre...</option>';
+                return;
+            }
+
+            professorSelect.disabled = true;
+            professorSelect.innerHTML = '<option value="">⏳ Cargando profesores...</option>';
+
+            try {
+                const response = await window.apiClient.getProfessorsBySemester(selectedSemester);
+                if (response.success && response.data.length > 0) {
+                    professorSelect.disabled = false;
+                    let options = '<option value="">-- Selecciona a tu profesor --</option>';
+                    response.data.forEach(p => options += `<option value="${p.name}">${p.name}</option>`);
+                    options += `<option value="Otro">Otro (No está en la lista)</option>`;
+                    professorSelect.innerHTML = options;
+                } else {
+                    professorSelect.disabled = false;
+                    professorSelect.innerHTML = '<option value="Otro">Otro (Escribir manualmente)</option>';
+                    manualGroup.classList.remove('d-none'); // Mostrar manual si no hay lista
+                }
+            } catch (e) {
+                alert("Error al conectar con la base de datos de profesores.");
+            }
+        });
+
+        // Mostrar/Ocultar campo manual si eligen "Otro"
+        professorSelect.addEventListener('change', () => {
+            if (professorSelect.value === 'Otro') {
+                manualGroup.classList.remove('d-none');
+                manualInput.required = true;
+                manualInput.focus();
+            } else {
+                manualGroup.classList.add('d-none');
+                manualInput.required = false;
+                manualInput.value = '';
+            }
+        });
+
+        // --- 3. MANEJO DE ARCHIVOS (PDF) ---
         const area = document.getElementById('fileUploadArea');
-        const input = document.getElementById('fileInput');
-
-        area.addEventListener('click', () => input.click());
-
-        input.addEventListener('change', (e) => {
+        area.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 const file = e.target.files[0];
                 if (file.type !== 'application/pdf') {
                     alert('❌ Solo se permiten archivos PDF');
-                    input.value = '';
+                    fileInput.value = '';
                     return;
                 }
                 document.getElementById('fileName').textContent = "✅ " + file.name;
                 area.style.borderColor = "#198754";
-                area.style.backgroundColor = "#f0fff4";
             }
         });
 
-        // --- Envío ---
+        // --- 4. ENVÍO DEL FORMULARIO ---
         document.getElementById('submitWorkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Validaciones
+            // Validar integrantes
             if (members.length === 0) {
                 document.getElementById('membersError').classList.remove('d-none');
-                alert('⚠️ Por favor agrega los nombres de los integrantes.');
+                alert('⚠️ Agrega al menos un integrante.');
                 return;
             }
-            if (input.files.length === 0) return alert('⚠️ Por favor selecciona un archivo PDF');
+
+            // Validar nombre de profesor
+            let finalProfessorName = professorSelect.value;
+            if (finalProfessorName === 'Otro') {
+                finalProfessorName = manualInput.value.trim();
+            }
+            if (!finalProfessorName) return alert("⚠️ Selecciona o escribe el nombre del profesor.");
+
+            if (fileInput.files.length === 0) return alert('⚠️ Selecciona un archivo PDF');
 
             const btn = document.getElementById('submitButton');
-            const originalText = btn.innerHTML;
-            btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
 
             try {
-                const user = (await window.apiClient.checkAuth()).user;
-
-                // Unimos los nombres en un solo string separado por comas
+                const session = await window.apiClient.checkAuth();
                 const membersString = members.join(', ');
 
-
                 const workData = {
-                    student_id: user.id,
+                    student_id: session.user.id,
                     title: document.getElementById('title').value,
                     abstract: document.getElementById('abstract').value,
-                    semester: document.getElementById('semester').value,
-                    group: document.getElementById('group').value, // <--- Nuevo
-                    professor_cargo: document.getElementById('professorInCharge').value, // <--- Nuevo
-                    team_members: membersString,
-                    modality: "Pendiente"
+                    semester: semesterSelect.value,
+                    group: document.getElementById('group').value,
+                    professor_cargo: finalProfessorName,
+                    team_members: membersString
                 };
 
-                const result = await window.apiClient.submitWork(workData, input.files[0]);
+                const result = await window.apiClient.submitWork(workData, fileInput.files[0]);
 
                 if (result.success) {
-                    alert('✅ Trabajo enviado correctamente.');
+                    alert('✅ Trabajo enviado correctamente. ID asignado: ' + result.shortId);
                     window.location.href = 'student-dashboard.html';
                 } else {
                     throw new Error(result.error);
                 }
             } catch (err) {
                 alert('Error: ' + err.message);
-                btn.disabled = false; btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.innerHTML = '📤 Enviar Trabajo';
             }
         });
     </script>

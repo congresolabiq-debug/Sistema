@@ -147,6 +147,13 @@ const apiClient = {
         return await postData({ action: 'generateCertificates', work_id: workId });
     },
 
+    async getProfessorsBySemester(semester) {
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProfessorsBySemester&semester=${encodeURIComponent(semester)}`);
+            return await res.json();
+        } catch (e) { return { success: false, data: [] }; }
+    },
+
     // ✅ Método genérico POST expuesto para llamadas directas desde el HTML
     async post(data) {
         return await postData(data);
