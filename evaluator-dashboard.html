@@ -441,7 +441,7 @@
             <p class="mb-1 text-muted"><small>📅 Semestre: ${a.works?.semester || 'N/D'}</small></p>
             <p class="mb-2 text-muted"><small>👤 Alumno: ${a.works?.student_name || 'N/D'}</small></p>
             <button class="btn btn-primary btn-sm w-100 mt-2"
-              onclick="openEval('${a.id}', '${a.work_id}', \`${(a.works?.title || '').replace(/`/g, "'")}\`, '${a.works?.url || ''}', '${a.works?.semester || ''}')">
+              onclick="openEval('${a.id}', '${a.work_id}', \`${(a.works?.title || '').replace(/`/g, "'")}\`, '${a.works?.file_url || ''}', '${a.works?.semester || ''}')">
               📝 Evaluar Documento
             </button>
           </div>
@@ -454,15 +454,30 @@
         function openEval(assignId, workId, title, url, semester) {
             currentAssignmentId = assignId;
             currentWorkId = workId;
+
             document.getElementById('evalWorkTitle').innerText = title;
-            document.getElementById('evalWorkSemester').innerText = semester ? `📅 Semestre: ${semester}` : '';
+            document.getElementById('evalWorkSemester').innerText = semester || 'Sin semestre';
+
             const urlEl = document.getElementById('evalWorkUrl');
-            urlEl.href = url || '#';
-            urlEl.style.display = url ? 'inline-block' : 'none';
-            // Limpiar formulario
-            document.getElementById('evalScore').value = '';
+
+            // VALIDACIÓN CRÍTICA:
+            if (url && url !== '' && url !== 'undefined') {
+                urlEl.href = url;
+                urlEl.classList.remove('disabled');
+                urlEl.innerHTML = '📄 Leer Trabajo (PDF)';
+            } else {
+                urlEl.href = '#';
+                urlEl.classList.add('disabled');
+                urlEl.innerHTML = '❌ PDF no disponible';
+            }
+
+            // Reiniciar Sliders y Valores Visuales...
+            document.querySelectorAll('.rubric-slider').forEach(slider => slider.value = 0);
+            document.querySelectorAll('.rubric-val').forEach(span => span.innerText = '0');
+            document.getElementById('totalRubricScore').innerText = '0';
             document.getElementById('evalModality').value = '';
             document.getElementById('evalComments').value = '';
+
             new bootstrap.Modal(document.getElementById('evalModal')).show();
         }
 
