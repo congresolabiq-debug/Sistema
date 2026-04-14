@@ -71,12 +71,12 @@
             <li class="nav-item">
                 <button class="nav-link active" id="phase1-tab" data-bs-toggle="tab" data-bs-target="#phase1"
                     type="button">
-                    📄 Fase 1: Documental
+                    📄 Fase 1: Resumenes
                 </button>
             </li>
             <li class="nav-item">
                 <button class="nav-link" id="phase2-tab" data-bs-toggle="tab" data-bs-target="#phase2" type="button">
-                    🎤 Fase 2: Presencial (En Vivo)
+                    🎤 Fase 2: Presentación oral/cartel
                 </button>
             </li>
         </ul>
@@ -105,7 +105,8 @@
             <!-- FASE 2 -->
             <div class="tab-pane fade" id="phase2">
                 <div class="alert alert-info border-start border-4 border-info">
-                    <strong>Instrucciones:</strong> Evalúa al alumno durante su presentación en vivo. Escala de 0 a 5
+                    <strong>Instrucciones:</strong> Evalúa al alumno durante su presentación oral/cartel. Escala de 0 a
+                    5
                     por criterio.
                 </div>
                 <div id="phase2List" class="row">
@@ -124,7 +125,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">📋 Evaluación Documental (Rúbrica Oficial)</h5>
+                    <h5 class="modal-title">📋 Evaluación de Resumenes</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -305,6 +306,7 @@
                                     <option value="">-- Selecciona una opción --</option>
                                     <option value="ponencia">🎤 Ponencia (Oral)</option>
                                     <option value="poster">📊 Cartel (Póster)</option>
+                                    <option value="poster">❌ Rechazado </option>
                                 </select>
                             </div>
 
@@ -331,7 +333,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header text-white" style="background: #6f42c1;">
-                    <h5 class="modal-title">🎤 Evaluación Presencial</h5>
+                    <h5 class="modal-title">🎤 Evaluación Presentación Oral/Cartel</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -433,7 +435,7 @@
         <div class="col-12">
           <div class="alert alert-success text-center">
             <h5>🎉 ¡Al día!</h5>
-            <p class="mb-0">No tienes evaluaciones documentales pendientes.</p>
+            <p class="mb-0">No tienes evaluaciones de resumen pendientes.</p>
           </div>
         </div>`;
                 return;
@@ -605,7 +607,7 @@
             if (myLive.length === 0) {
                 container.innerHTML = `<div class="col-12">
         <div class="alert alert-secondary text-center">
-          No tienes evaluaciones presenciales asignadas aún.
+          No tienes evaluaciones de presntaciones orales/cartel asignadas aún.
         </div>
       </div>`;
                 return;
