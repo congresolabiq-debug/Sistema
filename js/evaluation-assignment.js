@@ -37,7 +37,9 @@ class EvaluationAssignment {
     // El evaluador solo ve lo que le falta evaluar, no lo ya evaluado.
     async getAssignedWorks(evaluatorId) {
         const allAssignments = await window.apiClient.getAssignments();
-        // Quitamos el filtro de status !== 'completed' para traer TODO
+
+        // ESTA LÍNEA ES LA CLAVE: 
+        // Solo debemos filtrar por el ID del evaluador, NO por el estado.
         return allAssignments.filter(a => a.evaluator_id === evaluatorId);
     }
 
