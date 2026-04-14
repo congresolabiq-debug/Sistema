@@ -59,20 +59,36 @@
                                 <div class="mb-3 d-none" id="evaluatorGroupsGroup">
                                     <label class="form-label fw-bold">Grupos a los que imparte clase *</label>
                                     <input type="text" class="form-control" id="evaluatorGroups"
-                                        placeholder="Ej: 1301, 1305, 2102">
+                                        placeholder="Ej: 4301, 4852, 4102">
                                     <div class="form-text">Indica los grupos en los que imparte clase este semestre.
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Contraseña -->
                             <div class="mb-3">
-                                <label class="form-label">Contraseña</label>
+                                <label class="form-label">Contraseña *</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="password" minlength="6" required>
                                     <button class="btn btn-outline-secondary" type="button"
                                         onclick="togglePassword('password', this)">
                                         👁️
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- Confirmar Contraseña (NUEVO) -->
+                            <div class="mb-3">
+                                <label class="form-label">Confirmar Contraseña *</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirmPassword" minlength="6"
+                                        required>
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        onclick="togglePassword('confirmPassword', this)">
+                                        👁️
+                                    </button>
+                                </div>
+                                <div id="passError" class="form-text text-danger d-none">❌ Las contraseñas no coinciden.
                                 </div>
                             </div>
 
@@ -118,10 +134,23 @@
             const email = document.getElementById('email').value;
             const type = document.getElementById('userType').value;
             const pass = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirmPassword').value; // Nuevo
             const adminCode = document.getElementById('adminCode').value;
-            const evaluatorGroups = document.getElementById('evaluatorGroups').value; // Nuevo
+            const evaluatorGroups = document.getElementById('evaluatorGroups').value;
+            const passError = document.getElementById('passError');
 
-            // VALIDACIÓN DE SEGURIDAD
+            // 1. VALIDACIÓN DE COINCIDENCIA DE CONTRASEÑA
+            if (pass !== confirmPass) {
+                passError.classList.remove('d-none');
+                document.getElementById('confirmPassword').classList.add('is-invalid');
+                alert('❌ Las contraseñas no coinciden. Por favor, verifícalas.');
+                return;
+            } else {
+                passError.classList.add('d-none');
+                document.getElementById('confirmPassword').classList.remove('is-invalid');
+            }
+
+            // 2. VALIDACIÓN DE CÓDIGO DOCENTE
             if (type === 'evaluator') {
                 if (adminCode.toLowerCase() !== 'zaragoza') {
                     alert('⛔ CÓDIGO INCORRECTO.\nNo tienes autorización para registrarte como Evaluador.');
@@ -130,8 +159,10 @@
             }
 
             const btn = document.querySelector('button[type="submit"]');
-            btn.disabled = true; btn.innerText = "Registrando...";
+            btn.disabled = true;
+            btn.innerText = "Registrando...";
 
+            // 3. LLAMADA A LA API
             const result = await window.apiClient.registerUser(email, pass, name, type, evaluatorGroups);
 
             if (result.success) {
@@ -139,7 +170,8 @@
                 window.location.href = 'login.html';
             } else {
                 alert('❌ Error: ' + result.error);
-                btn.disabled = false; btn.innerText = "Registrarse";
+                btn.disabled = false;
+                btn.innerText = "Registrarse";
             }
         });
     </script>
