@@ -54,6 +54,13 @@
             background: transparent;
         }
     </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LABIQ">
+    <link rel="apple-touch-icon"
+        href="https://raw.githubusercontent.com/congresolabiq-debug/Sistema/refs/heads/main/favicon.ico">
 </head>
 
 <body>
@@ -145,6 +152,15 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('PWA lista para instalar'))
+                    .catch(err => console.log('Error al registrar PWA', err));
+            });
+        }
+    </script>
 </body>
 
 </html>
