@@ -37,9 +37,8 @@ class EvaluationAssignment {
     // El evaluador solo ve lo que le falta evaluar, no lo ya evaluado.
     async getAssignedWorks(evaluatorId) {
         const allAssignments = await window.apiClient.getAssignments();
-        return allAssignments.filter(
-            a => a.evaluator_id === evaluatorId && a.status !== 'completed'
-        );
+        // Quitamos el filtro de status !== 'completed' para traer TODO
+        return allAssignments.filter(a => a.evaluator_id === evaluatorId);
     }
 
     // ✅ NUEVO: Devuelve TODAS las asignaciones del evaluador (para historial)

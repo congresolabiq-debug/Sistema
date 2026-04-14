@@ -419,44 +419,74 @@
         // FASE 1 — Evaluación Documental
         // ============================================================
 
+        // SUSTITUYE LO QUE TIENES POR ESTO:
+
         async function loadPhase1() {
             const container = document.getElementById('phase1List');
-            container.innerHTML = `<div class="col-12 text-center py-4">
-      <div class="spinner-border text-primary"></div>
-      <p class="mt-2 text-muted">Cargando...</p>
-    </div>`;
+            container.innerHTML = `<div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>`;
 
             const system = new EvaluationAssignment();
-            // ✅ Solo trae las asignaciones PENDIENTES (status !== 'completed')
+            // Ahora esta función traerá todos (pendientes y completados)
             const assigns = await system.getAssignedWorks(session.user.id);
 
-            if (assigns.length === 0) {
-                container.innerHTML = `
-        <div class="col-12">
-          <div class="alert alert-success text-center">
-            <h5>🎉 ¡Al día!</h5>
-            <p class="mb-0">No tienes evaluaciones de resumen pendientes.</p>
-          </div>
-        </div>`;
-                return;
+            const pending = assigns.filter(a => a.status !== 'completed');
+            const completed = assigns.filter(a => a.status === 'completed');
+
+            let html = '';
+
+            // SECCIÓN 1: PENDIENTES
+            html += `<div class="col-12 mb-3"><h5 class="text-danger fw-bold">⏳ Pendientes por Evaluar (${pending.length})</h5><hr></div>`;
+
+            if (pending.length === 0) {
+                html += `<div class="col-12"><div class="alert alert-light text-center border">No tienes evaluaciones pendientes.</div></div>`;
+            } else {
+                html += pending.map(a => renderWorkCard(a, false)).join('');
             }
 
-            container.innerHTML = assigns.map(a => `
+            // SECCIÓN 2: EVALUADOS (HISTORIAL)
+            if (completed.length > 0) {
+                html += `<div class="col-12 mb-3 mt-5"><h5 class="text-success fw-bold">✅ Evaluados / Historial (${completed.length})</h5><hr></div>`;
+                html += completed.map(a => renderWorkCard(a, true)).join('');
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ESTA FUNCIÓN TAMBIÉN ES NUEVA Y NECESARIA
+        function renderWorkCard(a, isCompleted) {
+            const title = (a.works?.title || 'Sin título').replace(/`/g, "'");
+            const shortId = a.works?.short_id || '---';
+            const pdfUrl = a.works?.file_url || '';
+
+            return `
       <div class="col-md-6 mb-3">
-        <div class="card work-card h-100 shadow-sm">
+        <div class="card work-card h-100 shadow-sm ${isCompleted ? 'opacity-75 border-success' : ''}">
           <div class="card-body">
-            <div class="badge bg-primary mb-2">${a.works?.short_id || ''}</div>
-            <h5 class="text-primary mb-1">${a.works?.title || 'Sin título'}</h5>
-            <p class="mb-1 text-muted"><small>📅 Semestre: ${a.works?.semester || 'N/D'}</small></p>
-            <p class="mb-2 text-muted"><small>👤 Alumno: ${a.works?.student_name || 'N/D'}</small></p>
-            <button class="btn btn-primary btn-sm w-100 mt-2"
-              onclick="openEval('${a.id}', '${a.work_id}', \`${(a.works?.title || '').replace(/`/g, "'")}\`, '${a.works?.file_url || ''}', '${a.works?.semester || ''}')">
-              📝 Evaluar Documento
-            </button>
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge ${isCompleted ? 'bg-success' : 'bg-primary'}">${shortId}</span>
+                ${isCompleted ? '<span class="badge bg-light text-success border border-success">Evaluado</span>' : ''}
+            </div>
+            <h5 class="text-dark fw-bold mb-1" style="font-size: 1.1rem;">${title}</h5>
+            <p class="mb-1 text-muted small">👤 Alumno: ${a.works?.student_name || 'N/D'}</p>
+            <p class="mb-2 text-muted small">📅 Semestre: ${a.works?.semester || 'N/D'}</p>
+            
+            <div class="row g-2 mt-2">
+                <div class="col-6">
+                    <a href="${pdfUrl}" target="_blank" class="btn btn-outline-secondary btn-sm w-100">
+                        📄 Ver PDF
+                    </a>
+                </div>
+                <div class="col-6">
+                    <button class="btn ${isCompleted ? 'btn-success' : 'btn-primary'} btn-sm w-100"
+                        onclick="openEval('${a.id}', '${a.work_id}', \`${title}\`, '${pdfUrl}', '${a.works?.semester || ''}')">
+                        ${isCompleted ? '📝 Ver/Editar' : '📝 Evaluar'}
+                    </button>
+                </div>
+            </div>
           </div>
         </div>
       </div>
-    `).join('');
+    `;
         }
 
         // ✅ RESTAURADO: Abre el modal de evaluación Fase 1
