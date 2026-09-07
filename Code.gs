@@ -184,9 +184,19 @@ function seExcedioFechaLimiteSubida() {
   return new Date() > fecha;
 }
 
-function leerClaveConfig(key, fallback) {
+function getConfigSheet() {
   const db = SpreadsheetApp.getActiveSpreadsheet();
-  const configSheet = db.getSheetByName('config');
+  let sheet = db.getSheetByName('config');
+  if (sheet) return sheet;
+  const all = db.getSheets();
+  for (const s of all) {
+    if (s.getName().trim().toLowerCase() === 'config') return s;
+  }
+  return null;
+}
+
+function leerClaveConfig(key, fallback) {
+  const configSheet = getConfigSheet();
   if (configSheet) {
     const data = configSheet.getDataRange().getValues();
     for (let i = 0; i < data.length; i++) {
@@ -200,9 +210,8 @@ function leerClaveConfig(key, fallback) {
 }
 
 function guardarClaveConfig(key, value) {
-  const db = SpreadsheetApp.getActiveSpreadsheet();
-  const configSheet = db.getSheetByName('config');
-  if (!configSheet) throw new Error('No se encontró la hoja config.');
+  let configSheet = getConfigSheet();
+  if (!configSheet) configSheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet('config');
   const rows = configSheet.getDataRange().getValues();
   const k = String(key).trim().toLowerCase();
   let idx = -1;
