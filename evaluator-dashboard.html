@@ -109,6 +109,10 @@
 
             <!-- FASE 2 -->
             <div class="tab-pane fade" id="phase2">
+                <div id="phase2ExternalBanner" class="alert alert-info d-none">
+                    <strong>Los trabajos de la fase 2 serán evaluados en</strong>
+                    <a href="https://congresolabiq.github.io/EncuentroIQ" target="_blank" rel="noopener">https://congresolabiq.github.io/EncuentroIQ</a>
+                </div>
                 <div class="alert alert-info border-start border-4 border-info">
                     <strong>Instrucciones:</strong> Evalúa al alumno durante su presentación oral/cartel.
                 </div>
@@ -747,6 +751,14 @@
             if (!session) return window.location.href = 'login.html';
             loadPhase1();
             loadPhase2();
+
+            try {
+                const cfg = await window.apiClient.getConfig();
+                if (cfg.encuentroiq_mode === '1') {
+                    const banner = document.getElementById('phase2ExternalBanner');
+                    if (banner) banner.classList.remove('d-none');
+                }
+            } catch (e) { /* si falla la consulta, se muestra el flujo normal */ }
 
             // Limpiar iframe del PDF al cerrar el modal
             const evalModal = document.getElementById('evalModal');
