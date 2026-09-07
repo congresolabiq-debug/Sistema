@@ -43,6 +43,7 @@ La hoja de cálculo activa se obtiene con `SpreadsheetApp.getActiveSpreadsheet()
 |---|---|---|
 | `event_date` | `15-17 de julio de 2026` | Fecha del congreso (se muestra en agendas) |
 | `evaluator_code` | `LABIQ2026` | Código secreto para registro de evaluadores |
+| `submission_deadline` | `2026-07-10T18:00:00.000Z` | Fecha límite (ISO 8601) para la subida de trabajos en Fase 1; vacío = sin límite. Bloquea `submitWork` en el backend una vez vencida |
 
 ---
 

@@ -151,6 +151,19 @@ const apiClient = {
         } catch (e) { return { success: false, data: [] }; }
     },
 
+    // Configuración del sistema
+    async getConfig() {
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getConfig`);
+            const json = await res.json();
+            return json.success ? json.data : {};
+        } catch (e) { return {}; }
+    },
+
+    async setSubmissionDeadline(deadlineISO) {
+        return await postData({ action: 'setSubmissionDeadline', deadline: deadlineISO });
+    },
+
     // Recuperación de contraseña
     async forgotPassword(email) {
         return await postData({

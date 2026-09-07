@@ -101,6 +101,9 @@ function doGet(e) {
       });
       result = { success: true, data: { oral, poster, porCiclo } };
     }
+    else if (action === 'getConfig') {
+      result = { success: true, data: { submission_deadline: obtenerFechaLimiteSubida(), event_date: obtenerFechaEvento() } };
+    }
   } catch (error) {
     result = { success: false, error: error.toString() };
   }
@@ -147,6 +150,38 @@ function obtenerFechaEvento() {
     }
   }
   return '15-17 de julio de 2026';
+}
+
+function obtenerFechaLimiteSubida() {
+  const db = SpreadsheetApp.getActiveSpreadsheet();
+  const configSheet = db.getSheetByName('config');
+  if (configSheet) {
+    const data = configSheet.getDataRange().getValues();
+    for (let i = 0; i < data.length; i++) {
+      if (String(data[i][0]).trim().toLowerCase() === 'submission_deadline') {
+        const val = data[i][1];
+        if (val instanceof Date) return val.toISOString();
+        return String(val).trim();
+      }
+    }
+  }
+  return '';
+}
+
+function formatearFechaLimite(fecha) {
+  const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const d = new Date(fecha);
+  if (isNaN(d.getTime())) return 'la fecha límite configurada';
+  return d.getDate() + ' de ' + meses[d.getMonth()] + ' de ' + d.getFullYear() + ' a las ' +
+    String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function seExcedioFechaLimiteSubida() {
+  const limite = obtenerFechaLimiteSubida();
+  if (!limite) return false;
+  const fecha = new Date(limite);
+  if (isNaN(fecha.getTime())) return false;
+  return new Date() > fecha;
 }
 
 function obtenerCodigoEvaluador() {
@@ -239,6 +274,9 @@ function doPost(e) {
     }
 
     else if (data.action === 'submitWork') {
+      if (seExcedioFechaLimiteSubida()) {
+        throw new Error('La fecha límite para subir trabajos (' + formatearFechaLimite(obtenerFechaLimiteSubida()) + ') ya ha pasado.');
+      }
       const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
       const blob = Utilities.newBlob(Utilities.base64Decode(data.fileBase64), 'application/pdf', data.fileName);
       const file = folder.createFile(blob);
@@ -271,6 +309,12 @@ function doPost(e) {
         row[h.indexOf('team_members')] = data.team_members;
         if (h.indexOf('grupo') > -1) row[h.indexOf('grupo')] = data.group;
         if (h.indexOf('profesor_cargo') > -1) row[h.indexOf('profesor_cargo')] = data.professor_cargo;
+        if (h.indexOf('facultad') > -1) row[h.indexOf('facultad')] = data.facultad || '';
+        if (h.indexOf('project_type') > -1) row[h.indexOf('project_type')] = data.project_type || '';
+        if (h.indexOf('asesores') > -1) row[h.indexOf('asesores')] = data.asesores || '';
+        if (h.indexOf('facultad') > -1) row[h.indexOf('facultad')] = data.facultad || '';
+        if (h.indexOf('project_type') > -1) row[h.indexOf('project_type')] = data.project_type || '';
+        if (h.indexOf('asesores') > -1) row[h.indexOf('asesores')] = data.asesores || '';
 
         wSheet.appendRow(row);
         SpreadsheetApp.flush();
@@ -278,6 +322,22 @@ function doPost(e) {
         if (lockAcquired) lock.releaseLock();
       }
       result = { success: true, shortId: sId };
+    }
+
+    else if (data.action === 'setSubmissionDeadline') {
+      const configSheet = db.getSheetByName('config');
+      if (!configSheet) throw new Error('No se encontró la hoja config.');
+      const rows = configSheet.getDataRange().getValues();
+      let encontrado = false;
+      for (let i = 0; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toLowerCase() === 'submission_deadline') {
+          configSheet.getRange(i + 1, 2).setValue(data.deadline || '');
+          encontrado = true;
+          break;
+        }
+      }
+      if (!encontrado) configSheet.appendRow(['submission_deadline', data.deadline || '']);
+      result = { success: true };
     }
 
     else if (data.action === 'assignWork') {

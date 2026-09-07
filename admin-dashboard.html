@@ -113,6 +113,11 @@
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <small class="text-muted">Fecha límite subida Fase 1</small>
+                                <input type="datetime-local" class="form-control form-control-sm" id="submissionDeadlineInput" style="max-width: 220px;" aria-label="Fecha límite para la subida de trabajos en Fase 1">
+                                <button class="btn btn-sm btn-outline-primary fw-bold" onclick="saveSubmissionDeadline()">Guardar</button>
+                            </div>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
                             <button class="btn btn-warning btn-sm fw-bold" onclick="assignAllPendingWorks()">
@@ -533,6 +538,7 @@
                 renderDashboard();
                 loadUploadToggle();
                 loadEncuentroIQTgl();
+                loadSubmissionDeadline();
             } catch (e) { showToast('Error al cargar: ' + e.message, 'error'); }
         }
 
@@ -1080,6 +1086,34 @@
             document.getElementById('uploadToggle').checked = enabled;
             const label = document.getElementById('uploadToggleLabel');
             if (label) label.textContent = enabled ? 'Subida activa' : 'Subida desactivada';
+        }
+
+        function toDateTimeLocalValue(d) {
+            const pad = n => String(n).padStart(2, '0');
+            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        }
+
+        async function loadSubmissionDeadline() {
+            try {
+                const cfg = await window.apiClient.getConfig();
+                const el = document.getElementById('submissionDeadlineInput');
+                if (!el) return;
+                el.value = cfg.submission_deadline ? toDateTimeLocalValue(new Date(cfg.submission_deadline)) : '';
+            } catch (e) { /* se ignora; el campo queda vacío */ }
+        }
+
+        async function saveSubmissionDeadline() {
+            const el = document.getElementById('submissionDeadlineInput');
+            const val = el.value || '';
+            const iso = val ? new Date(val).toISOString() : '';
+            const btn = event.target;
+            btn.disabled = true;
+            try {
+                const res = await window.apiClient.setSubmissionDeadline(iso);
+                if (res.success) showToast(val ? 'Fecha límite guardada correctamente.' : 'Fecha límite eliminada.', 'success');
+                else showToast('Error: ' + res.error, 'error');
+            } catch (e) { showToast('Error: ' + e.message, 'error'); }
+            btn.disabled = false;
         }
 
         function toggleEncuentroIQ() {
