@@ -168,6 +168,21 @@ const apiClient = {
         return await postData({ action: 'setConfig', key, value });
     },
 
+    // Actividad de evaluadores
+    async getEvaluatorActivity() {
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getEvaluatorActivity`);
+            const json = await res.json();
+            return json.success ? json.data : [];
+        } catch (e) { return []; }
+    },
+
+    async registerActivity(status = 'available') {
+        const s = getSession();
+        if (!s) return { success: false };
+        return await postData({ action: 'registerActivity', user_id: s.id, status });
+    },
+
     // Recuperación de contraseña
     async forgotPassword(email) {
         return await postData({

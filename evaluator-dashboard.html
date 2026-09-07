@@ -749,6 +749,8 @@
         document.addEventListener('DOMContentLoaded', async () => {
             session = await window.apiClient.checkAuth();
             if (!session) return window.location.href = 'login.html';
+            window.apiClient.registerActivity('available');
+            setInterval(() => window.apiClient.registerActivity('available'), 60000);
             loadPhase1();
             loadPhase2();
 

@@ -31,6 +31,34 @@ function doGet(e) {
       const users = getSheetData(db, 'users');
       result = { success: true, data: users.filter(u => u.user_type === 'evaluator') };
     }
+    else if (action === 'getEvaluatorActivity') {
+      const users = getSheetData(db, 'users');
+      const assignments = getSheetData(db, 'assignments');
+      const liveAssignments = getSheetData(db, 'live_assignments');
+      const evaluations = getSheetData(db, 'evaluations');
+      const liveEvals = getSheetData(db, 'live_evaluations');
+      let statuses = [];
+      try { statuses = getSheetData(db, 'live_evaluator_status'); } catch (err) { statuses = []; }
+
+      const now = Date.now();
+      const evaluators = users.filter(u => u.user_type === 'evaluator').map(u => {
+        const row = statuses.find(s => String(s.evaluator_id) === String(u.id)) || {};
+        const lastAct = row.last_activity ? new Date(row.last_activity).getTime() : 0;
+        const phase1Done = evaluations.filter(e => String(e.evaluator_id) === String(u.id)).length;
+        const phase2Done = liveEvals.filter(e => String(e.evaluator_id) === String(u.id)).length;
+        return {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          status: row.status || 'available',
+          last_activity: row.last_activity || null,
+          lastActivityMs: lastAct || 0,
+          activeRecently: !!lastAct && (now - lastAct < INACTIVO_MS),
+          totalDone: phase1Done + phase2Done
+        };
+      });
+      result = { success: true, data: evaluators };
+    }
     else if (action === 'getAssignments') {
       const assignments = getSheetData(db, 'assignments');
       const works = getSheetData(db, 'works');
@@ -222,6 +250,43 @@ function guardarClaveConfig(key, value) {
   else configSheet.appendRow([k, value]);
 }
 
+// --- ACTIVIDAD DE EVALUADORES (live_evaluator_status) ---
+
+const INACTIVO_MS = 5 * 60 * 1000;
+
+function getEvaluatorStatusSheet(db) {
+  let sheet = db.getSheetByName('live_evaluator_status');
+  if (!sheet) {
+    sheet = db.insertSheet('live_evaluator_status');
+    sheet.appendRow(['evaluator_id', 'status', 'last_activity', 'updated_at']);
+  }
+  return sheet;
+}
+
+// Upsert: si no existe el evaluador lo crea; si existe actualiza last_activity.
+function registerEvaluatorActivity(db, userId, forceStatus) {
+  const sheet = getEvaluatorStatusSheet(db);
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const eIdx = headers.indexOf('evaluator_id');
+  const sIdx = headers.indexOf('status');
+  const laIdx = headers.indexOf('last_activity');
+  const uaIdx = headers.indexOf('updated_at');
+  const now = new Date();
+
+  if (eIdx === -1) throw new Error('live_evaluator_status no tiene la columna evaluator_id');
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][eIdx]) === String(userId)) {
+      sheet.getRange(i + 1, laIdx + 1).setValue(now);
+      sheet.getRange(i + 1, uaIdx + 1).setValue(now);
+      if (forceStatus && sIdx > -1 && uaIdx > -1 && laIdx > -1) sheet.getRange(i + 1, sIdx + 1).setValue(forceStatus);
+      return;
+    }
+  }
+  sheet.appendRow([String(userId), forceStatus || 'available', now, now]);
+}
+
 function obtenerCodigoEvaluador() {
   const db = SpreadsheetApp.getActiveSpreadsheet();
   const configSheet = db.getSheetByName('config');
@@ -372,6 +437,13 @@ function doPost(e) {
       const value = String(data.value === undefined ? '' : data.value).trim();
       if (!key) throw new Error('Falta la clave de configuración.');
       guardarClaveConfig(key, value);
+      result = { success: true };
+    }
+
+    else if (data.action === 'registerActivity') {
+      const evaluator = getSheetData(db, 'users').find(u => u.id === data.user_id);
+      if (!evaluator) throw new Error('Evaluador no encontrado.');
+      registerEvaluatorActivity(db, evaluator.id, data.status || 'available');
       result = { success: true };
     }
 

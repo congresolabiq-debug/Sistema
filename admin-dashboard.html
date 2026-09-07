@@ -186,6 +186,36 @@
                         </div>
                     </div>
 
+                    <!-- Actividad de Evaluadores -->
+                    <div class="mt-4">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                            </svg>
+                            <h5 class="mb-0">Actividad de Evaluadores</h5>
+                            <span class="small text-muted">Inactividad &gt; 5 min</span>
+                            <button class="btn btn-sm btn-outline-primary ms-auto" onclick="loadEvaluatorActivity()">Actualizar</button>
+                        </div>
+                        <div class="card border-0 shadow-sm">
+                            <div class="table-responsive">
+                                <table class="table data-table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Evaluador</th>
+                                            <th style="width:130px;">Estado</th>
+                                            <th style="width:150px;">Última actividad</th>
+                                            <th class="text-center" style="width:100px;">Evaluados</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="evaluatorActivityBody">
+                                        <tr><td colspan="4" class="text-center text-muted py-4">Cargando...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Trabajos listos para dictaminar -->
                     <div class="mt-4" id="readyWorksContainer">
                         <div class="d-flex align-items-center gap-2 mb-2">
@@ -539,6 +569,7 @@
                 loadUploadToggle();
                 loadEncuentroIQTgl();
                 loadSubmissionDeadline();
+                loadEvaluatorActivity();
             } catch (e) { showToast('Error al cargar: ' + e.message, 'error'); }
         }
 
@@ -1115,6 +1146,45 @@
             } catch (e) { showToast('Error: ' + e.message, 'error'); }
             btn.disabled = false;
         }
+
+        function evaluatorActivityBadge(ev) {
+            if (ev.activeRecently) return '<span class="badge bg-success">Activo</span>';
+            return '<span class="badge bg-secondary">Sin actividad</span>';
+        }
+
+        function lastActivityLabel(lastMs) {
+            if (!lastMs) return 'Nunca';
+            const diff = Date.now() - lastMs;
+            if (diff < 60000) return 'Hace ' + Math.max(1, Math.round(diff / 1000)) + 's';
+            return 'Hace ' + Math.max(1, Math.round(diff / 60000)) + ' min';
+        }
+
+        async function loadEvaluatorActivity() {
+            const body = document.getElementById('evaluatorActivityBody');
+            if (!body) return;
+            try {
+                const evaluators = await window.apiClient.getEvaluatorActivity();
+                if (!evaluators.length) {
+                    body.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No hay evaluadores registrados aún.</td></tr>';
+                    return;
+                }
+                body.innerHTML = evaluators.map(ev => `
+                    <tr>
+                        <td>
+                            <div class="fw-semibold small">${ev.name || 'Evaluador'}</div>
+                            <div class="text-muted" style="font-size:0.75rem;">${ev.email || ''}</div>
+                        </td>
+                        <td>${evaluatorActivityBadge(ev)}</td>
+                        <td class="small">${lastActivityLabel(ev.lastActivityMs)}</td>
+                        <td class="small text-center">${ev.totalDone}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Error al cargar la actividad.</td></tr>';
+            }
+        }
+
+        setInterval(loadEvaluatorActivity, 30000);
 
         async function toggleEncuentroIQ() {
             const enabled = document.getElementById('encuentroIQTgl').checked;
