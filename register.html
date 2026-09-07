@@ -100,11 +100,11 @@
                                 <!-- Campo para grupos del profesor (Solo visible para evaluadores) -->
                                 <div class="mb-3 d-none" id="evaluatorGroupsGroup">
                                     <label class="form-label fw-bold">Grupos de laboratorio a los que imparte clase
-                                        *</label>
+                                        (opcional)</label>
                                     <input type="text" class="form-control" id="evaluatorGroups"
                                         placeholder="Ej: 4301, 4852, 4102">
-                                    <div class="form-text">Indica los grupos en los que imparte clase este semestre.
-                                        * Si es profesor de asignatura, deja el espacio en blanco.
+                                    <div class="form-text">Indica los grupos en los que imparte clase este semestre. Si
+                                        es profesor de asignatura, deja el espacio en blanco.
                                     </div>
                                 </div>
                             </div>
@@ -187,7 +187,7 @@
                 codeGroup.classList.remove('d-none');
                 groupsGroup.classList.remove('d-none'); // Mostrar
                 document.getElementById('adminCode').required = true;
-                document.getElementById('evaluatorGroups').required = true; // Hacerlo obligatorio
+                document.getElementById('evaluatorGroups').required = false;
             } else {
                 codeGroup.classList.add('d-none');
                 groupsGroup.classList.add('d-none'); // Ocultar
