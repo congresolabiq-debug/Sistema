@@ -749,8 +749,17 @@
         document.addEventListener('DOMContentLoaded', async () => {
             session = await window.apiClient.checkAuth();
             if (!session) return window.location.href = 'login.html';
-            window.apiClient.registerActivity('available');
-            setInterval(() => window.apiClient.registerActivity('available'), 60000);
+
+            function sendActivity() {
+                try {
+                    if (window.apiClient && typeof window.apiClient.registerActivity === 'function') {
+                        window.apiClient.registerActivity('available').catch(() => {});
+                    }
+                } catch (e) { /* el heartbeat no debe romper la página */ }
+            }
+            sendActivity();
+            setInterval(sendActivity, 60000);
+
             loadPhase1();
             loadPhase2();
 
