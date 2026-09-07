@@ -1116,16 +1116,25 @@
             btn.disabled = false;
         }
 
-        function toggleEncuentroIQ() {
+        async function toggleEncuentroIQ() {
             const enabled = document.getElementById('encuentroIQTgl').checked;
             localStorage.setItem('congresoLabIQ_useEncuentroIQMode', enabled ? '1' : '0');
             const label = document.getElementById('encuentroIQToggleLabel');
             if (label) label.textContent = enabled ? 'Modo EncuentroIQ: on' : 'Modo EncuentroIQ: off';
+            try {
+                const res = await window.apiClient.setConfig('encuentroiq_mode', enabled ? '1' : '0');
+                if (res.success) showToast(enabled ? 'Modo EncuentroIQ activado para todos.' : 'Modo FESZ activado para todos.', 'success');
+                else showToast('Error: ' + res.error, 'error');
+            } catch (e) { showToast('Error: ' + e.message, 'error'); }
         }
 
-        function loadEncuentroIQTgl() {
-            const val = localStorage.getItem('congresoLabIQ_useEncuentroIQMode');
-            const enabled = val === '1';
+        async function loadEncuentroIQTgl() {
+            let enabled = localStorage.getItem('congresoLabIQ_useEncuentroIQMode') === '1';
+            try {
+                const cfg = await window.apiClient.getConfig();
+                if (cfg.encuentroiq_mode) enabled = cfg.encuentroiq_mode === '1';
+            } catch (e) { /* si falla la consulta, se usa el valor local */ }
+            localStorage.setItem('congresoLabIQ_useEncuentroIQMode', enabled ? '1' : '0');
             document.getElementById('encuentroIQTgl').checked = enabled;
             const label = document.getElementById('encuentroIQToggleLabel');
             if (label) label.textContent = enabled ? 'Modo EncuentroIQ: on' : 'Modo EncuentroIQ: off';

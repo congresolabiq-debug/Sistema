@@ -270,34 +270,36 @@
     <script src="js/api-client.js"></script>
     <script src="js/app.js"></script>
     <script>
-        // Bloquear si la subida está desactivada o si venció la fecha límite
+        // Bloquear si la subida está desactivada o si venció la fecha límite;
+        // además define el modo (FESZ vs EncuentroIQ) desde el servidor.
         let submissionDeadlineLabel = '';
+        let isEncuentroIQ = localStorage.getItem('congresoLabIQ_useEncuentroIQMode') === '1';
+
+        function applyEncuentroIQMode() {
+            document.getElementById('modeFESZ').style.display = isEncuentroIQ ? 'none' : '';
+            document.getElementById('modeEncuentroIQ').style.display = isEncuentroIQ ? '' : 'none';
+        }
+        applyEncuentroIQMode();
+
         (async () => {
             if (localStorage.getItem('congresoLabIQ_uploadsEnabled') === '0') {
                 window.location.href = 'student-dashboard.html';
                 return;
             }
-            try {
-                const cfg = await window.apiClient.getConfig();
-                const dl = cfg.submission_deadline ? new Date(cfg.submission_deadline) : null;
-                if (dl && !isNaN(dl.getTime())) {
-                    submissionDeadlineLabel = dl.toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' });
-                    const banner = document.getElementById('deadlineBanner');
-                    if (banner) banner.innerHTML = '<div class="alert alert-warning py-2 mb-4"><small>⚠️ Fecha límite para subir trabajos: <strong>' + submissionDeadlineLabel + '</strong></small></div>';
-                    if (Date.now() > dl.getTime()) {
-                        window.location.href = 'student-dashboard.html';
-                        return;
-                    }
+            let cfg = {};
+            try { cfg = await window.apiClient.getConfig(); } catch (e) { /* el backend aún valida */ }
+            if (cfg.encuentroiq_mode) { isEncuentroIQ = cfg.encuentroiq_mode === '1'; applyEncuentroIQMode(); }
+            const dl = cfg.submission_deadline ? new Date(cfg.submission_deadline) : null;
+            if (dl && !isNaN(dl.getTime())) {
+                submissionDeadlineLabel = dl.toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' });
+                const banner = document.getElementById('deadlineBanner');
+                if (banner) banner.innerHTML = '<div class="alert alert-warning py-2 mb-4"><small>⚠️ Fecha límite para subir trabajos: <strong>' + submissionDeadlineLabel + '</strong></small></div>';
+                if (Date.now() > dl.getTime()) {
+                    window.location.href = 'student-dashboard.html';
+                    return;
                 }
-            } catch (e) { /* si falla la consulta, el backend aún valida */ }
+            }
         })();
-
-        // Detectar modo (FESZ vs EncuentroIQ)
-        const isEncuentroIQ = localStorage.getItem('congresoLabIQ_useEncuentroIQMode') === '1';
-        if (isEncuentroIQ) {
-            document.getElementById('modeFESZ').style.display = 'none';
-            document.getElementById('modeEncuentroIQ').style.display = '';
-        }
 
         // --- VARIABLES GLOBALES ---
         let members = [];
@@ -305,7 +307,7 @@
         const fileInput = document.getElementById('fileInput');
 
         // --- MODO FESZ: Profesores dinámicos ---
-        if (!isEncuentroIQ) {
+        {
             const semesterSelect = document.getElementById('semesterFESZ');
             const professorSelect = document.getElementById('professorInCharge');
             const manualGroup = document.getElementById('manualProfessorGroup');
@@ -353,7 +355,7 @@
         }
 
         // --- MODO ENCUENTRO IQ: Etapa académica + Asesores ---
-        if (isEncuentroIQ) {
+        {
             const semesterIQ = document.getElementById('semesterIQ');
             document.querySelectorAll('input[name="etapa"]').forEach(r => {
                 r.addEventListener('change', () => {

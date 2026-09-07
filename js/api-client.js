@@ -164,6 +164,10 @@ const apiClient = {
         return await postData({ action: 'setSubmissionDeadline', deadline: deadlineISO });
     },
 
+    async setConfig(key, value) {
+        return await postData({ action: 'setConfig', key, value });
+    },
+
     // Recuperación de contraseña
     async forgotPassword(email) {
         return await postData({

@@ -102,7 +102,7 @@ function doGet(e) {
       result = { success: true, data: { oral, poster, porCiclo } };
     }
     else if (action === 'getConfig') {
-      result = { success: true, data: { submission_deadline: obtenerFechaLimiteSubida(), event_date: obtenerFechaEvento() } };
+      result = { success: true, data: { submission_deadline: obtenerFechaLimiteSubida(), event_date: obtenerFechaEvento(), encuentroiq_mode: leerClaveConfig('encuentroiq_mode', '0') } };
     }
   } catch (error) {
     result = { success: false, error: error.toString() };
@@ -182,6 +182,35 @@ function seExcedioFechaLimiteSubida() {
   const fecha = new Date(limite);
   if (isNaN(fecha.getTime())) return false;
   return new Date() > fecha;
+}
+
+function leerClaveConfig(key, fallback) {
+  const db = SpreadsheetApp.getActiveSpreadsheet();
+  const configSheet = db.getSheetByName('config');
+  if (configSheet) {
+    const data = configSheet.getDataRange().getValues();
+    for (let i = 0; i < data.length; i++) {
+      if (String(data[i][0]).trim().toLowerCase() === String(key).trim().toLowerCase()) {
+        const v = data[i][1];
+        if (v !== '' && v !== null && v !== undefined) return String(v).trim();
+      }
+    }
+  }
+  return fallback;
+}
+
+function guardarClaveConfig(key, value) {
+  const db = SpreadsheetApp.getActiveSpreadsheet();
+  const configSheet = db.getSheetByName('config');
+  if (!configSheet) throw new Error('No se encontró la hoja config.');
+  const rows = configSheet.getDataRange().getValues();
+  const k = String(key).trim().toLowerCase();
+  let idx = -1;
+  for (let i = 0; i < rows.length; i++) {
+    if (String(rows[i][0]).trim().toLowerCase() === k) { idx = i; break; }
+  }
+  if (idx > -1) configSheet.getRange(idx + 1, 2).setValue(value);
+  else configSheet.appendRow([k, value]);
 }
 
 function obtenerCodigoEvaluador() {
@@ -325,18 +354,15 @@ function doPost(e) {
     }
 
     else if (data.action === 'setSubmissionDeadline') {
-      const configSheet = db.getSheetByName('config');
-      if (!configSheet) throw new Error('No se encontró la hoja config.');
-      const rows = configSheet.getDataRange().getValues();
-      let encontrado = false;
-      for (let i = 0; i < rows.length; i++) {
-        if (String(rows[i][0]).trim().toLowerCase() === 'submission_deadline') {
-          configSheet.getRange(i + 1, 2).setValue(data.deadline || '');
-          encontrado = true;
-          break;
-        }
-      }
-      if (!encontrado) configSheet.appendRow(['submission_deadline', data.deadline || '']);
+      guardarClaveConfig('submission_deadline', data.deadline || '');
+      result = { success: true };
+    }
+
+    else if (data.action === 'setConfig') {
+      const key = String(data.key || '').trim().toLowerCase();
+      const value = String(data.value === undefined ? '' : data.value).trim();
+      if (!key) throw new Error('Falta la clave de configuración.');
+      guardarClaveConfig(key, value);
       result = { success: true };
     }
 
